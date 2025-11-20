@@ -1,0 +1,163 @@
+class Emotion {
+  final String name;
+  final List<String> subEmotions;
+
+  Emotion({
+    required this.name,
+    required this.subEmotions,
+  });
+}
+
+final List<Emotion> mainEmotions = [
+  Emotion(
+    name: 'SZCZĘŚLIWY',
+    subEmotions: [
+      'Zadowolony',
+      'Żartobliwy',
+      'Zaintersowany',
+      'Dumny',
+      'Akceptowany',
+      'Pełen Siły',
+      'Spokojny',
+      'Czujący bliskość',
+      'Optymistyczny',
+      'Zuchwały',
+      'Pobudzony',
+      'Wolny',
+      'Wesoły',
+      'Zaciekawiony',
+      'Dociekliwy',
+      'Ważny',
+      'Pewny siebie',
+      'Szanowany',
+      'Doceniony',
+      'Odważny',
+      'Kreatywny',
+      'Kochający',
+      'Wdzięczny',
+      'Czuły',
+      'Figlarny',
+      'Pełen nadziei',
+      'Zainspirowany'
+    ],
+  ),
+  Emotion(
+    name: 'ZASKOCZONY',
+    subEmotions: [
+      'Przestraszony',
+      'Zmieszany',
+      'Zdumiony'
+      'Podekscytowany',
+      'Wstrząśnięty',
+      'Skoncentrowany',
+      'Zakłopotany',
+      'Zatrwożony',
+      'Zdziwiony',
+      'Ochoczy',
+      'Energiczny'
+    ],
+  ),
+  Emotion(
+    name: 'SŁABY',
+    subEmotions: [
+      'Zmęczony',
+      'Zestresowany',
+      'Zapracowany',
+      'Znudzony',
+      'Rozkojarzony',
+      'Senny',
+      'Tracący kontrolę',
+      'Przygnieciony',
+      'Pośpieszany',
+      'Pod presją',
+      'Apatyczny',
+      'Obojętny'
+    ],
+  ),
+  Emotion(
+    name: 'LĘKLIWY',
+    subEmotions: [
+      'Wystraszony',
+      'Niespokojny',
+      'Niepewny',
+      'Uległy',
+      'Odrzucony',
+      'Zastraszony',
+      'Bezsilny',
+      'Przytłoczony',
+      'Zamartwiony',
+      'Niewystarczający',
+      'Podrzędny',
+      'Bezwartościowy',
+      'Nieistotny',
+      'Wyobcowany',
+      'Niepasujący',
+      'Nerwowy',
+      'Zdemaskowany'
+    ],
+  ),
+  Emotion(
+    name: 'ROZGNIEWANY',
+    subEmotions: [
+      'Upokorzony',
+      'Nienawistny',
+      'Zagrożony',
+      'Agresywny',
+      'Sfrustrowany',
+      'Zdystansowany',
+      'Krytyczny',
+      'Zdradzony',
+      'Urażony',
+      'Zbagatelizowany',
+      'Ośmieszony',
+      'Zgorszony',
+      'Zbeszczeczony',
+      'Zazdrosny',
+      'Wrogo nastawiony',
+      'Sprowokowany',
+      'Oburzony',
+      'Poirytowany',
+      'Zamknięty w sobie',
+      'Podejrzliwy',
+      'Sceptyczny',
+      'Sarkastyczny'
+    ],
+  ),
+  Emotion(
+    name: 'ZNIESMACZONY',
+    subEmotions: [
+      'Nieprzychylny',
+      'Czujący się podle',
+      'Stroniący',
+      'Niechętny',
+      'Krytykancki',
+      'Zbuntowany',
+      'Antypatyczny',
+      'Podburzony',
+      'Obrzydzony',
+      'Czujący odrazę',
+    ],
+  ),
+  Emotion(
+    name: 'SMUTNY',
+    subEmotions: [
+      'Samotny',
+      'Zraniony',
+      'Zrozpaczony',
+      'Winny',
+      'Przygnębiony',
+      'Odizolowany',
+      'Porzucony',
+      'Prześladowany',
+      'Słabowity',
+      'W bólu, w żałobie',
+      'Bezsilny',
+      'Zawstydzony',
+      'Skruszony',
+      'Wyczerpany',
+      'Gorszy od innych',
+      'Rozczarowany',
+      'Zlekceważony'
+    ],
+  ),
+];
