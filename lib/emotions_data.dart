@@ -46,7 +46,7 @@ final List<Emotion> mainEmotions = [
     subEmotions: [
       'Przestraszony',
       'Zmieszany',
-      'Zdumiony'
+      'Zdumiony',
       'Podekscytowany',
       'Wstrząśnięty',
       'Skoncentrowany',

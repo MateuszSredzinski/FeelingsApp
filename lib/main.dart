@@ -161,9 +161,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final cubit = getIt<EntryCubit>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Feeling')),
       body: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: EdgeInsets.only(top: 20.0),
         child: Column(
           children: [
             const Text('Wybierz główną emocję:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -171,7 +170,7 @@ class _HomePageState extends State<HomePage> {
 
             // GRID głównych emocji (2 kolumny), pokazujemy max 5 widocznych + reszta przewijana
             SizedBox(
-              height: 280,
+              height: 580,
               child: GridView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: mainEmotions.length,
@@ -185,21 +184,28 @@ class _HomePageState extends State<HomePage> {
                   final e = mainEmotions[index];
                   final isSelected = selectedEmotions.containsKey(e.name);
                   return Card(
+                    
                     color: isSelected ? Colors.blue.shade100 : Colors.grey.shade100,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: isSelected ? Colors.blue : Colors.grey.shade400, width: 1.0),
+                      side: BorderSide(color: isSelected ? Colors.blue : Colors.grey.shade400, width: 1.2),
                     ),
                     child: Padding(
+                      
                       padding: const EdgeInsets.all(8.0),
+                      child: SingleChildScrollView(
+
                       child: Column(
+                        
                         children: [
                           ElevatedButton(
+                            
                             style: ElevatedButton.styleFrom(
                               backgroundColor: isSelected ? Colors.blue : Colors.grey[300],
                             ),
                             onPressed: () => _openPopupFor(e),
                             child: Text(
+                              
                               e.name,
                               style: TextStyle(color: isSelected ? Colors.white : Colors.black),
                             ),
@@ -207,6 +213,7 @@ class _HomePageState extends State<HomePage> {
                           const SizedBox(height: 6),
                           Wrap(
                             spacing: 4,
+                            
                             runSpacing: 4,
                             children: e.subEmotions.take(3).map((sub) {
                               final sel = selectedEmotions.containsKey(sub);
@@ -221,7 +228,7 @@ class _HomePageState extends State<HomePage> {
                               );
                             }).toList(),
                           ),
-                        ],
+                        ],)
                       ),
                     ),
                   );
