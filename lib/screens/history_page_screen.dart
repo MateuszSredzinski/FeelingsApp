@@ -1,9 +1,12 @@
 import 'package:feelings/cubbit/entry_cubbit.dart';
+import 'package:feelings/emotions_data.dart';
 import 'package:feelings/emotions_data_hive_entry.dart';
 import 'package:feelings/main.dart';
 import 'package:feelings/screens/choose_emotions_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:feelings/widgets/feelings_dialog.dart';
+import 'package:feelings/settings/settings_screen.dart';
 
 class EmotionHistoryPage extends StatelessWidget {
   const EmotionHistoryPage({super.key});
@@ -13,27 +16,60 @@ class EmotionHistoryPage extends StatelessWidget {
     final cubit = getIt<EntryCubit>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Historia emocji")),
+      appBar: AppBar(
+        title: const Text("Historia emocji"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: BlocBuilder<EntryCubit, List<EmotionEntry>>(
         bloc: cubit,
         builder: (context, state) {
-          if (state.isEmpty) {
+          final visibleEntries = <MapEntry<int, EmotionEntry>>[];
+          for (var i = 0; i < state.length; i++) {
+            final entry = state[i];
+            if (!entry.isDeleted) {
+              visibleEntries.add(MapEntry(i, entry));
+            }
+          }
+
+          visibleEntries.sort(
+            (a, b) => b.value.dateTime.compareTo(a.value.dateTime),
+          );
+
+          if (visibleEntries.isEmpty) {
             return const Center(child: Text('Brak zapisanych wpisów'));
           }
           return ListView.builder(
-            itemCount: state.length,
+            itemCount: visibleEntries.length,
             itemBuilder: (context, index) {
-              final entry = state[index];
+              final item = visibleEntries[index];
+              final entry = item.value;
+              final originalIndex = item.key;
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
                   title: Text(entry.title.isEmpty ? "Bez tytułu" : entry.title),
                   subtitle:
                       Text(entry.emotions.entries.map((e) => '${e.key}: ${e.value}/6').join(', ')),
-                  trailing: Text(
-                    '${entry.dateTime.hour.toString().padLeft(2, '0')}:${entry.dateTime.minute.toString().padLeft(2, '0')}',
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(_formatTime(entry.dateTime)),
+                      const SizedBox(height: 4),
+                      Text('${_formatDate(entry.dateTime)}, ${_weekdayName(entry.dateTime)}'),
+                    ],
                   ),
-                  onTap: () => _showEntryDialog(context, entry, index),
+                  onTap: () => _showEntryDialog(context, entry, originalIndex),
+                  onLongPress: () => _confirmDelete(context, originalIndex),
                 ),
               );
             },
@@ -48,8 +84,7 @@ class EmotionHistoryPage extends StatelessWidget {
       context: context,
       barrierColor: Colors.black.withOpacity(0.4),
       builder: (dialogContext) {
-        return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        return FeelingsDialog(
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -72,36 +107,54 @@ class EmotionHistoryPage extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: entry.emotions.entries.map((emotion) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                            onPressed: null,
-                            child: Text(
-                              emotion.key,
-                              style: const TextStyle(color: Colors.white),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _groupEntryByMain(entry).entries.map((group) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(group.key, style: const TextStyle(fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 4),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: group.value.map((emotion) {
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    ElevatedButton(
+                                      style:
+                                          ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                                      onPressed: null,
+                                      child: Text(
+                                        emotion.key,
+                                        style: const TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    _buildIntensityDots(emotion.value),
+                                  ],
+                                );
+                              }).toList(),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          _buildIntensityDots(emotion.value),
-                        ],
+                          ],
+                        ),
                       );
                     }).toList(),
                   ),
                   const SizedBox(height: 20),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: const Text('Zamknij'),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () {
+                          Navigator.of(dialogContext).pop();
+                          _confirmDelete(context, index);
+                        },
                       ),
-                      const SizedBox(width: 12),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(dialogContext).pop();
@@ -110,17 +163,67 @@ class EmotionHistoryPage extends StatelessWidget {
                               builder: (_) => EmotionSelectPage(
                                 initialSelection: Map<String, int>.from(entry.emotions),
                                 entryIndex: index,
-                                initialNote: entry.title,
+                                initialNote: entry.situationDescription,
+                                initialPersonalNote: entry.personalNote,
                               ),
                             ),
                           );
                         },
                         child: const Text('Edytuj'),
                       ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        child: const Text('Zamknij'),
+                      ),
                     ],
                   ),
                 ],
               ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _confirmDelete(BuildContext context, int index) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.4),
+      builder: (dialogContext) {
+        return FeelingsDialog(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Przenieść wpis do kosza?',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                const Text('Wpis zostanie oznaczony jako usunięty i trafi do kosza.'),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      child: const Text('Anuluj'),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await getIt<EntryCubit>().deleteToTrash(index);
+                        if (dialogContext.mounted) Navigator.of(dialogContext).pop();
+                      },
+                      child: const Text('Przenieś do kosza'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         );
@@ -144,5 +247,41 @@ class EmotionHistoryPage extends StatelessWidget {
         );
       }),
     );
+  }
+
+  String _formatTime(DateTime dt) =>
+      '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+
+  String _formatDate(DateTime dt) =>
+      '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
+
+  String _weekdayName(DateTime dt) {
+    const names = [
+      'poniedziałek',
+      'wtorek',
+      'środa',
+      'czwartek',
+      'piątek',
+      'sobota',
+      'niedziela',
+    ];
+    return names[(dt.weekday - 1) % 7];
+  }
+
+  Map<String, List<MapEntry<String, int>>> _groupEntryByMain(EmotionEntry entry) {
+    final Map<String, String> subToMain = {};
+    for (final main in mainEmotions) {
+      for (final sub in main.subEmotions) {
+        subToMain[sub] = main.name;
+      }
+    }
+
+    final Map<String, List<MapEntry<String, int>>> grouped = {};
+    entry.emotions.forEach((sub, value) {
+      final main = subToMain[sub] ?? 'Inne';
+      grouped.putIfAbsent(main, () => []);
+      grouped[main]!.add(MapEntry(sub, value));
+    });
+    return grouped;
   }
 }

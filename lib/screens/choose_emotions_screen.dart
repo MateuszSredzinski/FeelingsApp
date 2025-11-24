@@ -3,7 +3,9 @@ import 'package:feelings/cubbit/entry_cubbit.dart';
 import 'package:feelings/emotions_data.dart';
 import 'package:feelings/emotions_data_hive_entry.dart';
 import 'package:feelings/main.dart';
+import 'package:feelings/settings/settings_screen.dart';
 import 'package:feelings/screens/save_summary_popup.dart';
+import 'package:feelings/widgets/feelings_dialog.dart';
 import 'package:flutter/material.dart';
 
 class EmotionSelectPage extends StatefulWidget {
@@ -12,11 +14,13 @@ class EmotionSelectPage extends StatefulWidget {
     this.initialSelection,
     this.entryIndex,
     this.initialNote,
+    this.initialPersonalNote,
   });
 
   final Map<String, int>? initialSelection;
   final int? entryIndex;
   final String? initialNote;
+  final String? initialPersonalNote;
 
   @override
   State<EmotionSelectPage> createState() => _EmotionSelectPageState();
@@ -44,8 +48,7 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
       context: context,
       builder: (context) {
         return StatefulBuilder(builder: (context, setPopupState) {
-          return Dialog(
-            backgroundColor: Colors.white.withOpacity(0.95),
+          return FeelingsDialog(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: SingleChildScrollView(
@@ -67,6 +70,10 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: intensity != null ? Colors.blue : Colors.grey[300],
+                                foregroundColor: intensity != null ? Colors.white : Colors.black87,
+                                side: intensity != null
+                                    ? const BorderSide(color: Colors.blueAccent, width: 2)
+                                    : const BorderSide(color: Colors.transparent),
                               ),
                               onPressed: () {
                                 setPopupState(() {
@@ -76,8 +83,14 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
                                 });
                                 setState(() {});
                               },
-                              child: Text(sub,
-                                  style: TextStyle(color: intensity != null ? Colors.white : Colors.black)),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (intensity != null) const Icon(Icons.check, size: 16),
+                                  if (intensity != null) const SizedBox(width: 4),
+                                  Text(sub),
+                                ],
+                              ),
                             ),
 
                             if (intensity != null)
@@ -97,7 +110,7 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
                                       width: 12,
                                       height: 12,
                                       decoration: BoxDecoration(
-                                        color: selectedEmotions[sub]! >= barValue
+                                        color: (selectedEmotions[sub]! >= barValue)
                                             ? Colors.blue
                                             : Colors.grey[300],
                                         shape: BoxShape.circle,
@@ -132,7 +145,19 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
   Widget build(BuildContext context) {
     final hasSelection = selectedEmotions.isNotEmpty;
     return Scaffold(
-      appBar: AppBar(title: const Text("Wybierz emocje")),
+      appBar: AppBar(
+        title: const Text("Wybierz emocje"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
@@ -188,17 +213,29 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
         return SaveSummaryPopup(
           selectedEmotions: Map<String, int>.from(selectedEmotions),
           initialNote: widget.initialNote,
-          onConfirm: (note) async {
-            final appliedNote = note.isEmpty ? (widget.initialNote ?? '') : note;
+          initialPersonalNote: widget.initialPersonalNote,
+          groupedEmotions: _groupSelectedByMain(),
+          onConfirm: (situation, personalNote) async {
+            final appliedSituation = situation.isEmpty ? (widget.initialNote ?? '') : situation;
+            final appliedPersonalNote =
+                personalNote.isEmpty ? (widget.initialPersonalNote ?? '') : personalNote;
             final cubit = getIt<EntryCubit>();
             final entry = EmotionEntry(
               dateTime: DateTime.now(),
-              title: appliedNote,
+              title: appliedSituation,
+              situationDescription: appliedSituation,
+              personalNote: appliedPersonalNote,
               emotions: Map<String, int>.from(selectedEmotions),
             );
 
             if (widget.entryIndex != null) {
-              await cubit.update(widget.entryIndex!, selectedEmotions, title: appliedNote);
+              await cubit.update(
+                widget.entryIndex!,
+                selectedEmotions,
+                title: appliedSituation,
+                situationDescription: appliedSituation,
+                personalNote: appliedPersonalNote,
+              );
             } else {
               await cubit.addEntry(entry);
             }
@@ -206,9 +243,30 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
             setState(() {
               selectedEmotions.clear();
             });
+
+            if (widget.entryIndex != null && mounted) {
+              Navigator.of(context).pop();
+            }
           },
         );
       },
     );
+  }
+
+  Map<String, List<MapEntry<String, int>>> _groupSelectedByMain() {
+    final Map<String, String> subToMain = {};
+    for (final main in mainEmotions) {
+      for (final sub in main.subEmotions) {
+        subToMain[sub] = main.name;
+      }
+    }
+
+    final Map<String, List<MapEntry<String, int>>> grouped = {};
+    selectedEmotions.forEach((sub, value) {
+      final main = subToMain[sub] ?? 'Inne';
+      grouped.putIfAbsent(main, () => []);
+      grouped[main]!.add(MapEntry(sub, value));
+    });
+    return grouped;
   }
 }

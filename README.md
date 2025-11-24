@@ -16,27 +16,35 @@ type to terminal:
 
 
 W planach:
-Animated gradien border
-Flutter UI Glassmorphism & Neumorphism
 
-*Inny UI, wieksze pop upy
+ustawienia imienia, export danych w zębatce tyle rzeczy będzie
+w ustawieniach regulacja stopnia emocji 
 
-*Definicje emocji
+*Testowanie na android na fizycznym
 
 *Po wybraniu pod emocji w emocjach pokazanie ze juz cos sie wybralo - no nie wiem czy bedzie na to miejsce w tym containerze
 
-*kosz na wpisy, ktore sie usuwaja po 30 dniach, gdzie kosz - moze w ustwieniach (w ustawieniach regulacja stopnia emocji, kosz - przekierowanie do emocji w koszu, ustawienia imienia, export danych w zębatce tyle rzeczy będzie)
-
-*Zmiana podsumowania, w pop up dać wyświetlanie spod jakiej emocji głównej są dane emocje ktore są wybrane.
-notatka we wpisie, notatka w glownym ekranie - jakos ladnie nazwac
-
-*Testowanie na android 
-
-FIXY to do:
-*po edycji emocji z historii i nadpisaniu, ekran nie wraca do historii/podgladu emocji
-
+*dodać 8sme okno z notatką do dodania + podkreslenie ze juz cos tam sie zapisalo
 
 Done: 
 24.11.2025
 *Dodanie w głównym ekranie, po wybraniu jakiejkolwiek emocji przycisku zapisz. Zmiana w pop upie z pod emocjami przycisku z zapisz emocje na Zatwierdź, który jeszcze nie zapisuje emocji do bazy danych tylko zamyka pop up. Po przycisku zapisz pojawia się pop up z podsumowaniem tak jak po wejsciu w historii.
 Dodawanie notatek. To będzie inny pop up. Bo bedzie to pop up podsumowujący a nie ten z historii.
+
+24.11.2025 - experimental branch
+
+*Inny UI, wieksze pop upy - wykorzystaj: Animated gradien border
+Flutter UI Glassmorphism & Neumorphism
+
+*Definicje emocji w oddzielnym okienku w ustawieniach
+
+
+*kosz na wpisy, ktore sie usuwaja po 30 dniach, gdzie kosz - moze w ustwieniach, kosz - przekierowanie do emocji w koszu, 
+
+*Zmiana podsumowania, w pop up dać wyświetlanie spod jakiej emocji głównej są dane emocje ktore są wybrane.
+notatka we wpisie, notatka w glownym ekranie - jakos ladnie nazwac
+
+
+
+FIXY to do:
+*po edycji emocji z historii i nadpisaniu, ekran nie wraca do historii/podgladu emocji
