@@ -12,6 +12,7 @@ final List<Emotion> mainEmotions = [
   Emotion(
     name: 'SZCZĘŚLIWY',
     subEmotions: [
+      'Szczęśliwy ',
       'Zadowolony',
       'Żartobliwy',
       'Zaintersowany',
@@ -44,6 +45,7 @@ final List<Emotion> mainEmotions = [
   Emotion(
     name: 'ZASKOCZONY',
     subEmotions: [
+      'Zaskoczony ',
       'Przestraszony',
       'Zmieszany',
       'Zdumiony',
@@ -60,6 +62,7 @@ final List<Emotion> mainEmotions = [
   Emotion(
     name: 'SŁABY',
     subEmotions: [
+      'Słaby ',
       'Zmęczony',
       'Zestresowany',
       'Zapracowany',
@@ -77,6 +80,7 @@ final List<Emotion> mainEmotions = [
   Emotion(
     name: 'LĘKLIWY',
     subEmotions: [
+      'Lękliwy ',
       'Wystraszony',
       'Niespokojny',
       'Niepewny',
@@ -99,6 +103,7 @@ final List<Emotion> mainEmotions = [
   Emotion(
     name: 'ROZGNIEWANY',
     subEmotions: [
+      'Rozgniewany ',
       'Upokorzony',
       'Nienawistny',
       'Zagrożony',
@@ -126,6 +131,7 @@ final List<Emotion> mainEmotions = [
   Emotion(
     name: 'ZNIESMACZONY',
     subEmotions: [
+      'Zniesmaczony ',
       'Nieprzychylny',
       'Czujący się podle',
       'Stroniący',
@@ -141,6 +147,7 @@ final List<Emotion> mainEmotions = [
   Emotion(
     name: 'SMUTNY',
     subEmotions: [
+      'Smutny ',
       'Samotny',
       'Zraniony',
       'Zrozpaczony',

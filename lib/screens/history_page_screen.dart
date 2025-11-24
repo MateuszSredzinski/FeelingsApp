@@ -23,7 +23,7 @@ class EmotionHistoryPage extends StatelessWidget {
           return ListView.builder(
             itemCount: state.length,
             itemBuilder: (context, index) {
-              final entry = state[index] as EmotionEntry;
+              final entry = state[index];
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
