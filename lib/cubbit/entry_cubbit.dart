@@ -18,4 +18,15 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
     await repository.addEntry(entry);
     await load();
   }
+
+  Future<void> update(int index, Map<String, int> emotions, {String? title}) async {
+    final current = state[index];
+    final updated = EmotionEntry(
+      dateTime: current.dateTime,
+      title: title ?? current.title,
+      emotions: Map.from(emotions),
+    );
+    await repository.updateEntry(index, updated);
+    await load();
+  }
 }

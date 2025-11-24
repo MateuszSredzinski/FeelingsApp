@@ -8,11 +8,28 @@ class EntryRepository {
   EntryRepository(this.box);
 
   Future<void> addEntry(EmotionEntry entry) async {
-    await box.add(entry);
+    try {
+      await box.add(entry);
+    } catch (e) {
+      throw Exception('Failed to add entry: $e');
+    }
+  }
+
+  Future<void> updateEntry(int index, EmotionEntry entry) async {
+    try {
+      await box.putAt(index, entry);
+      await box.compact();
+    } catch (e) {
+      throw Exception('Failed to update entry: $e');
+    }
   }
 
   List<EmotionEntry> getAll() {
-    return box.values.map((e) => e as EmotionEntry).toList();
+    try {
+      return box.values.whereType<EmotionEntry>().toList();
+    } catch (e) {
+      throw Exception('Failed to read entries: $e');
+    }
   }
 
   Future<void> clearAll() async {

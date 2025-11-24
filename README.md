@@ -12,14 +12,27 @@ type to terminal:
 20.11.2025 Added data base cubit | creating repo on github
 23.11.2025 project repair 
 24.11.2025 Split to two screens (emotions choose | history)
+24.11.2025 Selected Emotions edit | Summary in history
 
 
 W planach:
 Animated gradien border
 Flutter UI Glassmorphism & Neumorphism
-Inny UI, wieksze pop upy
-Definicje emocji
-Edycja emocji
-Po wybraniu pod emocji w emocjach pokazanie ze juz cos sie wybralo
-umozliwic zapisanie emocji glownej, zrobic ja jako uzywalna
-Testowanie na android 
+
+*Inny UI, wieksze pop upy
+
+*Definicje emocji
+
+*Po wybraniu pod emocji w emocjach pokazanie ze juz cos sie wybralo - no nie wiem czy bedzie na to miejsce w tym containerze
+
+*umozliwic zapisanie emocji glownej, zrobic ja jako uzywalna
+
+*kosz na wpisy, ktore sie usuwaja po 30 dniach, gdzie kosz - moze w ustwieniach (w ustawieniach regulacja stopnia emocji, kosz - przekierowanie do emocji w koszu, ustawienia imienia, export danych w zębatce tyle rzeczy będzie)
+
+*Zmiana podsumowania, w pop up dać wyświetlanie spod jakiej emocji głównej są dane emocje ktore są wybrane.
+notatka we wpisie, notatka w glownym ekranie - jakos ladnie nazwac
+
+*Przycisk zatwierdz, po przycisku zatwierdz pojawia się pop up z podsumowaniem tak jak po wejsciu w historii.
+Dodawanie notatek
+
+*Testowanie na android 

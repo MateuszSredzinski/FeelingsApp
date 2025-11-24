@@ -5,14 +5,23 @@ import 'package:feelings/main.dart';
 import 'package:flutter/material.dart';
 
 class EmotionSelectPage extends StatefulWidget {
-  const EmotionSelectPage({super.key});
+  const EmotionSelectPage({super.key, this.initialSelection, this.entryIndex});
+
+  final Map<String, int>? initialSelection;
+  final int? entryIndex;
 
   @override
   State<EmotionSelectPage> createState() => _EmotionSelectPageState();
 }
 
 class _EmotionSelectPageState extends State<EmotionSelectPage> {
-  Map<String, int> selectedEmotions = {};
+  late Map<String, int> selectedEmotions;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedEmotions = Map<String, int>.from(widget.initialSelection ?? {});
+  }
 
   void toggleEmotionLocally(String name) {
     setState(() {
@@ -23,6 +32,7 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
   }
 
   void _openPopupFor(Emotion emotion) {
+    final pageContext = context;
     showDialog(
       context: context,
       builder: (context) {
@@ -98,10 +108,17 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
                     ElevatedButton(
                       onPressed: () async {
                         final cubit = getIt<EntryCubit>();
-                        await cubit.add(selectedEmotions);
+                        if (widget.entryIndex != null) {
+                          await cubit.update(widget.entryIndex!, selectedEmotions);
+                        } else {
+                          await cubit.add(selectedEmotions);
+                        }
                         selectedEmotions.clear();
                         setState(() {});
-                        Navigator.pop(context);
+                        Navigator.of(context).pop(); // close dialog
+                        if (widget.entryIndex != null) {
+                          Navigator.of(pageContext).pop(); // return to history after edit
+                        }
                       },
                       child: const Text('Zapisz emocje'),
                     ),
