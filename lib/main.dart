@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:iconsax/iconsax.dart';
 
-import 'emotions_data.dart'; // lista mainEmotions i klasa Emotion
+import 'emotions_data.dart';
 import 'emotions_data_hive_entry.dart';
 import 'entry_repo.dart';
 import 'cubbit/entry_cubbit.dart';
@@ -15,13 +16,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
 
-  // Zarejestruj adapter
   Hive.registerAdapter(EmotionEntryAdapter());
-
-  // Otwórz box
   final box = await Hive.openBox('entriesBox');
 
-  // Zarejestruj repo i cubit w get_it
   getIt.registerSingleton<EntryRepository>(EntryRepository(box));
   getIt.registerSingleton<EntryCubit>(EntryCubit(getIt<EntryRepository>())..load());
 
@@ -38,37 +35,78 @@ class FeelingApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       home: BlocProvider.value(
         value: getIt<EntryCubit>(),
-        child: const HomePage(),
+        child: const MainNavigationPage(),
       ),
     );
   }
 }
 
-// MODELE ENTRY już w models/emotion_entry.dart
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+//
+// ──────────────────────────────────────────────────────────
+//   GŁÓWNY NAVIGATION PAGE
+// ──────────────────────────────────────────────────────────
+//
+class MainNavigationPage extends StatefulWidget {
+  const MainNavigationPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<MainNavigationPage> createState() => _MainNavigationPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  // selectedEmotions trzymamy lokalnie w UI aż do zapisu
+class _MainNavigationPageState extends State<MainNavigationPage> {
+  int currentIndex = 0;
+
+  final screens = const [
+    EmotionSelectPage(),
+    EmotionHistoryPage(),
+  ];
+
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: screens[currentIndex],
+    bottomNavigationBar: BottomNavigationBar(
+      currentIndex: currentIndex,
+      onTap: (i) => setState(() => currentIndex = i),
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Iconsax.smileys),
+          label: "Emocje",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Iconsax.timer4),
+          label: "Historia",
+        ),
+      ],
+    ),
+  );
+}
+}
+
+//
+// ──────────────────────────────────────────────────────────
+//   EKRAN 1 — WYBÓR EMOCJI
+// ──────────────────────────────────────────────────────────
+//
+class EmotionSelectPage extends StatefulWidget {
+  const EmotionSelectPage({super.key});
+
+  @override
+  State<EmotionSelectPage> createState() => _EmotionSelectPageState();
+}
+
+class _EmotionSelectPageState extends State<EmotionSelectPage> {
   Map<String, int> selectedEmotions = {};
 
-  void _toggleEmotionLocally(String name) {
+  void toggleEmotionLocally(String name) {
     setState(() {
-      if (selectedEmotions.containsKey(name)) {
-        selectedEmotions.remove(name);
-      } else {
-        selectedEmotions[name] = 1;
-      }
+      selectedEmotions.containsKey(name)
+          ? selectedEmotions.remove(name)
+          : selectedEmotions[name] = 1;
     });
   }
 
   void _openPopupFor(Emotion emotion) {
-    // podobny popup jak wcześniej — ale zapis poprzez Cubit
     showDialog(
       context: context,
       builder: (context) {
@@ -81,8 +119,10 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Wybierz emocje z "${emotion.name}"', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text('Wybierz emocje z "${emotion.name}"',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
+
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -97,16 +137,16 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onPressed: () {
                                 setPopupState(() {
-                                  if (intensity == null) {
-                                    selectedEmotions[sub] = 1;
-                                  } else {
-                                    selectedEmotions.remove(sub);
-                                  }
+                                  intensity == null
+                                      ? selectedEmotions[sub] = 1
+                                      : selectedEmotions.remove(sub);
                                 });
-                                setState(() {}); // zsynchronizuj UI główny
+                                setState(() {});
                               },
-                              child: Text(sub, style: TextStyle(color: intensity != null ? Colors.white : Colors.black)),
+                              child: Text(sub,
+                                  style: TextStyle(color: intensity != null ? Colors.white : Colors.black)),
                             ),
+
                             if (intensity != null)
                               Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -124,7 +164,9 @@ class _HomePageState extends State<HomePage> {
                                       width: 12,
                                       height: 12,
                                       decoration: BoxDecoration(
-                                        color: selectedEmotions[sub]! >= barValue ? Colors.blue : Colors.grey[300],
+                                        color: selectedEmotions[sub]! >= barValue
+                                            ? Colors.blue
+                                            : Colors.grey[300],
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -135,10 +177,10 @@ class _HomePageState extends State<HomePage> {
                         );
                       }).toList(),
                     ),
+
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () async {
-                        // zapisz przez Cubit
                         final cubit = getIt<EntryCubit>();
                         await cubit.add(selectedEmotions);
                         selectedEmotions.clear();
@@ -159,116 +201,77 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = getIt<EntryCubit>();
     return Scaffold(
+      appBar: AppBar(title: const Text("Wybierz emocje")),
       body: Padding(
-        padding: EdgeInsets.only(top: 20.0),
-        child: Column(
-          children: [
-            const Text('Wybierz główną emocję:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-
-            // GRID głównych emocji (2 kolumny), pokazujemy max 5 widocznych + reszta przewijana
-            SizedBox(
-              height: 580,
-              child: GridView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: mainEmotions.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 1.2,
+        padding: const EdgeInsets.all(16.0),
+        child: GridView.builder(
+          itemCount: mainEmotions.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 1.25,
+          ),
+          itemBuilder: (context, index) {
+            final e = mainEmotions[index];
+            return Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: InkWell(
+                onTap: () => _openPopupFor(e),
+                child: Center(
+                  child: Text(
+                    e.name,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                 ),
-                itemBuilder: (context, index) {
-                  final e = mainEmotions[index];
-                  final isSelected = selectedEmotions.containsKey(e.name);
-                  return Card(
-                    
-                    color: isSelected ? Colors.blue.shade100 : Colors.grey.shade100,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: isSelected ? Colors.blue : Colors.grey.shade400, width: 1.2),
-                    ),
-                    child: Padding(
-                      
-                      padding: const EdgeInsets.all(8.0),
-                      child: SingleChildScrollView(
-
-                      child: Column(
-                        
-                        children: [
-                          ElevatedButton(
-                            
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isSelected ? Colors.blue : Colors.grey[300],
-                            ),
-                            onPressed: () => _openPopupFor(e),
-                            child: Text(
-                              
-                              e.name,
-                              style: TextStyle(color: isSelected ? Colors.white : Colors.black),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Wrap(
-                            spacing: 4,
-                            
-                            runSpacing: 4,
-                            children: e.subEmotions.take(3).map((sub) {
-                              final sel = selectedEmotions.containsKey(sub);
-                              return GestureDetector(
-                                onTap: () {
-                                  _toggleEmotionLocally(sub);
-                                },
-                                child: Chip(
-                                  backgroundColor: sel ? Colors.blue : Colors.grey[300],
-                                  label: Text(sub, style: TextStyle(color: sel ? Colors.white : Colors.black)),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ],)
-                      ),
-                    ),
-                  );
-                },
               ),
-            ),
-
-            const SizedBox(height: 12),
-            const Divider(),
-            const SizedBox(height: 8),
-            const Text('Twoje wpisy:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-
-            // lista wpisów połączona z Cubit
-            Expanded(
-              child: BlocBuilder<EntryCubit, List<dynamic>>(
-                bloc: cubit,
-                builder: (context, state) {
-                  if (state.isEmpty) {
-                    return const Center(child: Text('Brak zapisanych wpisów'));
-                  }
-                  return ListView.builder(
-                    itemCount: state.length,
-                    itemBuilder: (context, index) {
-                      final entry = state[index] as EmotionEntry;
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 6),
-                        child: ListTile(
-                          title: Text(entry.title.isEmpty ? 'Bez tytułu' : entry.title),
-                          subtitle: Text(entry.emotions.entries.map((e) => '${e.key}: ${e.value}/6').join(', ')),
-                          trailing: Text('${entry.dateTime.hour.toString().padLeft(2,'0')}:${entry.dateTime.minute.toString().padLeft(2,'0')}'),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+            );
+          },
         ),
+      ),
+    );
+  }
+}
+
+//
+// ──────────────────────────────────────────────────────────
+//   EKRAN 2 — HISTORIA EMOCJI
+// ──────────────────────────────────────────────────────────
+//
+class EmotionHistoryPage extends StatelessWidget {
+  const EmotionHistoryPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = getIt<EntryCubit>();
+
+    return Scaffold(
+      appBar: AppBar(title: const Text("Historia emocji")),
+      body: BlocBuilder<EntryCubit, List<dynamic>>(
+        bloc: cubit,
+        builder: (context, state) {
+          if (state.isEmpty) {
+            return const Center(child: Text('Brak zapisanych wpisów'));
+          }
+          return ListView.builder(
+            itemCount: state.length,
+            itemBuilder: (context, index) {
+              final entry = state[index] as EmotionEntry;
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: ListTile(
+                  title: Text(entry.title.isEmpty ? "Bez tytułu" : entry.title),
+                  subtitle:
+                      Text(entry.emotions.entries.map((e) => '${e.key}: ${e.value}/6').join(', ')),
+                  trailing: Text(
+                    '${entry.dateTime.hour.toString().padLeft(2, '0')}:${entry.dateTime.minute.toString().padLeft(2, '0')}',
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
