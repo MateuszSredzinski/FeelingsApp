@@ -12,3 +12,14 @@ type to terminal:
 20.11.2025 Added data base cubit | creating repo on github
 23.11.2025 project repair 
 24.11.2025 Split to two screens (emotions choose | history)
+
+
+W planach:
+Animated gradien border
+Flutter UI Glassmorphism & Neumorphism
+Inny UI, wieksze pop upy
+Definicje emocji
+Edycja emocji
+Po wybraniu pod emocji w emocjach pokazanie ze juz cos sie wybralo
+umozliwic zapisanie emocji glownej, zrobic ja jako uzywalna
+Testowanie na android 

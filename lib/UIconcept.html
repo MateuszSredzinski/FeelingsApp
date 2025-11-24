@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Selector UI</title>
+    <style>
+        :root {
+            --primary-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent: #7c4dff;
+            --accent-hover: #9c76ff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #7c4dff, #ff6d00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        .emotion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .emotion-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .emotion-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .emotion-card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(124, 77, 255, 0.4);
+        }
+        
+        .emotion-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        
+        .emotion-card:hover .emotion-icon {
+            transform: scale(1.2);
+        }
+        
+        .emotion-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .emotion-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(124, 77, 255, 0.3);
+        }
+        
+        .history-section {
+            margin-top: 2rem;
+            width: 100%;
+        }
+        
+        .history-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .history-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-emotion {
+            font-weight: 600;
+        }
+        
+        .history-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        
+        /* Kolory dla poszczególnych emocji */
+        .happy { background: linear-gradient(135deg, #ffd166, #ff9e00); }
+        .surprised { background: linear-gradient(135deg, #7c4dff, #3a00e0); }
+        .scared { background: linear-gradient(135deg, #6a11cb, #2575fc); }
+        .confused { background: linear-gradient(135deg, #8e2de2, #4a00e0); }
+        .amazed { background: linear-gradient(135deg, #ff6b6b, #ff8e53); }
+        .excited { background: linear-gradient(135deg, #42e695, #3bb2b8); }
+        .shocked { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .focused { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .embarrassed { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .worried { background: linear-gradient(135deg, #fd746c, #ff9068); }
+        .curious { background: linear-gradient(135deg, #a8ff78, #78ffd6); }
+        .willing { background: linear-gradient(135deg, #ffecd2, #fcb69f); }
+        .energetic { background: linear-gradient(135deg, #ff9a9e, #fad0c4); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Wybierz główną emocję</h1>
+            <p>Dotknij emocji, która najlepiej opisuje Twój nastrój</p>
+        </div>
+        
+        <div class="emotion-grid">
+            <div class="emotion-card happy" data-emotion="happy">
+                <div class="emotion-icon">😊</div>
+                <div class="emotion-name">SZCZĘŚLIWY</div>
+                <div class="emotion-desc">Radość, zadowolenie</div>
+                <div class="progress-container">
+                    <div class="progress-bar happy" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="emotion-card surprised" data-emotion="surprised">
+                <div class="emotion-icon">😲</div>
+                <div class="emotion-name">ZASKOCZONY</div>
+                <div class="emotion-desc">Niespodzianka, zdziwienie</div>
+                <div class="progress-container">
+                    <div class="progress-bar surprised" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="emotion-card scared" data-emotion="scared">
+                <div class="emotion-icon">😨</div>
+                <div class="emotion-name">Przestraszony</div>
+                <div class="emotion-desc">Strach, niepokój</div>
+                <div class="progress-container">
+                    <div class="progress-bar scared" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="emotion-card confused" data-emotion="confused">
+                <div class="emotion-icon">😕</div>
+                <div class="emotion-name">Zmieszany</div>
+                <div class="emotion-desc">Niepewność, dezorientacja</div>
+                <div class="progress-container">
+                    <div class="progress-bar confused" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="emotion-card amazed" data-emotion="amazed">
+                <div class="emotion-icon">🤩</div>
+                <div class="emotion-name">Zdumiony</div>
+                <div class="emotion-desc">Zachwyt, podziw</div>
+                <div class="progress-container">
+                    <div class="progress-bar amazed" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="emotion-card excited" data-emotion="excited">
+                <div class="emotion-icon">🤗</div>
+                <div class="emotion-name">Podekscytowany</div>
+                <div class="emotion-desc">Ekscytacja, entuzjazm</div>
+                <div class="progress-container">
+                    <div class="progress-bar excited" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="button">Zapisz emocje</button>
+        
+        <div class="history-section">
+            <div class="history-title">Twoje wpisy:</div>
+            <div class="history-item">
+                <div class="history-emotion">Zdumiony/Podekscytowany: 6/6</div>
+                <div class="history-date">Samotny: 1/6, 15:59</div>
+            </div>
+            <div class="history-item">
+                <div class="history-emotion">Zbagatelizowany: 4/6</div>
+                <div class="history-date">Nieprzychylny: 1/6, Czujący się podle: 4/6</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emotionCards = document.querySelectorAll('.emotion-card');
+            const saveButton = document.querySelector('.button');
+            
+            // Inicjalizacja animacji dla każdej karty
+            emotionCards.forEach(card => {
+                const emotion = card.dataset.emotion;
+                const progressBar = card.querySelector('.progress-bar');
+                
+                // Ustawienie losowego postępu dla demonstracji
+                const randomProgress = Math.floor(Math.random() * 100);
+                setTimeout(() => {
+                    progressBar.style.width = `${randomProgress}%`;
+                }, 300);
+                
+                // Obsługa kliknięcia
+                card.addEventListener('click', function() {
+                    // Usuń zaznaczenie ze wszystkich kart
+                    emotionCards.forEach(c => c.classList.remove('selected'));
+                    
+                    // Zaznacz klikniętą kartę
+                    this.classList.add('selected');
+                    
+                    // Animacja "wybuchu" cząstek
+                    createParticles(this);
+                });
+                
+                // Animacja najechania
+                card.addEventListener('mouseenter', function() {
+                    const icon = this.querySelector('.emotion-icon');
+                    icon.style.transform = 'scale(1.2) rotate(5deg)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    const icon = this.querySelector('.emotion-icon');
+                    icon.style.transform = 'scale(1) rotate(0deg)';
+                });
+            });
+            
+            // Funkcja tworząca cząsteczki
+            function createParticles(element) {
+                const rect = element.getBoundingClientRect();
+                const particleCount = 15;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    
+                    // Ustawienie koloru cząsteczki na podstawie karty
+                    const emotionClass = Array.from(element.classList).find(cls => 
+                        ['happy', 'surprised', 'scared', 'confused', 'amazed', 'excited'].includes(cls)
+                    );
+                    
+                    if (emotionClass) {
+                        particle.style.background = getComputedStyle(element.querySelector('.progress-bar')).background;
+                    }
+                    
+                    // Losowy rozmiar i pozycja
+                    const size = Math.random() * 8 + 4;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    
+                    const startX = rect.left + rect.width / 2;
+                    const startY = rect.top + rect.height / 2;
+                    
+                    particle.style.left = `${startX}px`;
+                    particle.style.top = `${startY}px`;
+                    
+                    // Losowy kierunek i animacja
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * 60 + 40;
+                    
+                    const endX = startX + Math.cos(angle) * distance;
+                    const endY = startY + Math.sin(angle) * distance;
+                    
+                    particle.style.animation = `float 1s ease-out forwards`;
+                    
+                    document.body.appendChild(particle);
+                    
+                    // Usunięcie cząsteczki po zakończeniu animacji
+                    setTimeout(() => {
+                        document.body.removeChild(particle);
+                    }, 1000);
+                }
+            }
+            
+            // Obsługa przycisku zapisywania
+            saveButton.addEventListener('click', function() {
+                const selectedCard = document.querySelector('.emotion-card.selected');
+                
+                if (selectedCard) {
+                    const emotionName = selectedCard.querySelector('.emotion-name').textContent;
+                    
+                    // Animacja przycisku
+                    this.style.transform = 'scale(0.95)';
+                    this.textContent = 'Zapisano!';
+                    
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                        this.textContent = 'Zapisz emocje';
+                    }, 1000);
+                    
+                    // Tutaj można dodać logikę zapisywania emocji
+                    console.log(`Zapisano emocję: ${emotionName}`);
+                } else {
+                    // Animacja błędu jeśli nic nie wybrano
+                    this.style.background = '#ff4757';
+                    this.textContent = 'Wybierz emocję!';
+                    
+                    setTimeout(() => {
+                        this.style.background = '';
+                        this.textContent = 'Zapisz emocje';
+                    }, 1000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
