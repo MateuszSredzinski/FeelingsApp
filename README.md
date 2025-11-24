@@ -32,6 +32,10 @@ notatka we wpisie, notatka w glownym ekranie - jakos ladnie nazwac
 
 *Testowanie na android 
 
+FIXY to do:
+*po edycji emocji z historii i nadpisaniu, ekran nie wraca do historii/podgladu emocji
+
+
 Done: 
 24.11.2025
 *Dodanie w głównym ekranie, po wybraniu jakiejkolwiek emocji przycisku zapisz. Zmiana w pop upie z pod emocjami przycisku z zapisz emocje na Zatwierdź, który jeszcze nie zapisuje emocji do bazy danych tylko zamyka pop up. Po przycisku zapisz pojawia się pop up z podsumowaniem tak jak po wejsciu w historii.
