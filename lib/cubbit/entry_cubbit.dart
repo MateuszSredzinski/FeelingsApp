@@ -13,10 +13,14 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
     emit(list);
   }
 
-  Future<void> add(Map<String, int> emotions, {String title = ''}) async {
-    final entry = EmotionEntry(dateTime: DateTime.now(), title: title, emotions: Map.from(emotions));
+  Future<void> addEntry(EmotionEntry entry) async {
     await repository.addEntry(entry);
     await load();
+  }
+
+  Future<void> add(Map<String, int> emotions, {String title = ''}) async {
+    final entry = EmotionEntry(dateTime: DateTime.now(), title: title, emotions: Map.from(emotions));
+    await addEntry(entry);
   }
 
   Future<void> update(int index, Map<String, int> emotions, {String? title}) async {

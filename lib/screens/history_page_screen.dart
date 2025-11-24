@@ -110,6 +110,7 @@ class EmotionHistoryPage extends StatelessWidget {
                               builder: (_) => EmotionSelectPage(
                                 initialSelection: Map<String, int>.from(entry.emotions),
                                 entryIndex: index,
+                                initialNote: entry.title,
                               ),
                             ),
                           );

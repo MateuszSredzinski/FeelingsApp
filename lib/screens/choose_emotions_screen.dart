@@ -1,14 +1,22 @@
 
 import 'package:feelings/cubbit/entry_cubbit.dart';
 import 'package:feelings/emotions_data.dart';
+import 'package:feelings/emotions_data_hive_entry.dart';
 import 'package:feelings/main.dart';
+import 'package:feelings/screens/save_summary_popup.dart';
 import 'package:flutter/material.dart';
 
 class EmotionSelectPage extends StatefulWidget {
-  const EmotionSelectPage({super.key, this.initialSelection, this.entryIndex});
+  const EmotionSelectPage({
+    super.key,
+    this.initialSelection,
+    this.entryIndex,
+    this.initialNote,
+  });
 
   final Map<String, int>? initialSelection;
   final int? entryIndex;
+  final String? initialNote;
 
   @override
   State<EmotionSelectPage> createState() => _EmotionSelectPageState();
@@ -32,7 +40,6 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
   }
 
   void _openPopupFor(Emotion emotion) {
-    final pageContext = context;
     showDialog(
       context: context,
       builder: (context) {
@@ -106,21 +113,10 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
 
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () async {
-                        final cubit = getIt<EntryCubit>();
-                        if (widget.entryIndex != null) {
-                          await cubit.update(widget.entryIndex!, selectedEmotions);
-                        } else {
-                          await cubit.add(selectedEmotions);
-                        }
-                        selectedEmotions.clear();
-                        setState(() {});
-                        Navigator.of(context).pop(); // close dialog
-                        if (widget.entryIndex != null) {
-                          Navigator.of(pageContext).pop(); // return to history after edit
-                        }
+                      onPressed: () {
+                        Navigator.of(context).pop(); // zamknij popup wyboru sub-emocji
                       },
-                      child: const Text('Zapisz emocje'),
+                      child: const Text('Zatwierdź'),
                     ),
                   ],
                 ),
@@ -134,35 +130,85 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
 
   @override
   Widget build(BuildContext context) {
+    final hasSelection = selectedEmotions.isNotEmpty;
     return Scaffold(
       appBar: AppBar(title: const Text("Wybierz emocje")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          itemCount: mainEmotions.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 1.25,
+      body: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: GridView.builder(
+                itemCount: mainEmotions.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 1.25,
+                ),
+                itemBuilder: (context, index) {
+                  final e = mainEmotions[index];
+                  return Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: InkWell(
+                      onTap: () => _openPopupFor(e),
+                      child: Center(
+                        child: Text(
+                          e.name,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
-          itemBuilder: (context, index) {
-            final e = mainEmotions[index];
-            return Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: InkWell(
-                onTap: () => _openPopupFor(e),
-                child: Center(
-                  child: Text(
-                    e.name,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
+          if (hasSelection)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _openSummaryPopup,
+                  child: const Text('Zapisz'),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+        ],
       ),
+    );
+  }
+
+  void _openSummaryPopup() {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.4),
+      builder: (dialogContext) {
+        return SaveSummaryPopup(
+          selectedEmotions: Map<String, int>.from(selectedEmotions),
+          initialNote: widget.initialNote,
+          onConfirm: (note) async {
+            final appliedNote = note.isEmpty ? (widget.initialNote ?? '') : note;
+            final cubit = getIt<EntryCubit>();
+            final entry = EmotionEntry(
+              dateTime: DateTime.now(),
+              title: appliedNote,
+              emotions: Map<String, int>.from(selectedEmotions),
+            );
+
+            if (widget.entryIndex != null) {
+              await cubit.update(widget.entryIndex!, selectedEmotions, title: appliedNote);
+            } else {
+              await cubit.addEntry(entry);
+            }
+
+            setState(() {
+              selectedEmotions.clear();
+            });
+          },
+        );
+      },
     );
   }
 }
