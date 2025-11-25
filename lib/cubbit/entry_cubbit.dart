@@ -18,19 +18,59 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
     await load();
   }
 
-  Future<void> add(Map<String, int> emotions, {String title = ''}) async {
-    final entry = EmotionEntry(dateTime: DateTime.now(), title: title, emotions: Map.from(emotions));
-    await addEntry(entry);
-  }
-
-  Future<void> update(int index, Map<String, int> emotions, {String? title}) async {
+  Future<void> update(
+    int index,
+    Map<String, int> emotions, {
+    String? title,
+    String? situationDescription,
+    String? personalNote,
+  }) async {
     final current = state[index];
     final updated = EmotionEntry(
       dateTime: current.dateTime,
       title: title ?? current.title,
+      situationDescription: situationDescription ?? current.situationDescription,
+      personalNote: personalNote ?? current.personalNote,
       emotions: Map.from(emotions),
+      isDeleted: current.isDeleted,
+      deletedAt: current.deletedAt,
     );
     await repository.updateEntry(index, updated);
+    await load();
+  }
+
+  Future<void> deleteToTrash(int index) async {
+    final current = state[index];
+    final updated = EmotionEntry(
+      dateTime: current.dateTime,
+      title: current.title,
+      situationDescription: current.situationDescription,
+      personalNote: current.personalNote,
+      emotions: Map.from(current.emotions),
+      isDeleted: true,
+      deletedAt: DateTime.now(),
+    );
+    await repository.updateEntry(index, updated);
+    await load();
+  }
+
+  Future<void> restore(int index) async {
+    final current = state[index];
+    final updated = EmotionEntry(
+      dateTime: current.dateTime,
+      title: current.title,
+      situationDescription: current.situationDescription,
+      personalNote: current.personalNote,
+      emotions: Map.from(current.emotions),
+      isDeleted: false,
+      deletedAt: null,
+    );
+    await repository.updateEntry(index, updated);
+    await load();
+  }
+
+  Future<void> deleteForever(int index) async {
+    await repository.deleteEntry(index);
     await load();
   }
 }

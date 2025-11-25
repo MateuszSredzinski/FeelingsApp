@@ -24,6 +24,15 @@ class EntryRepository {
     }
   }
 
+  Future<void> deleteEntry(int index) async {
+    try {
+      await box.deleteAt(index);
+      await box.compact();
+    } catch (e) {
+      throw Exception('Failed to delete entry: $e');
+    }
+  }
+
   List<EmotionEntry> getAll() {
     try {
       return box.values.whereType<EmotionEntry>().toList();
