@@ -9,7 +9,6 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
   EntryCubit(this.repository) : super([]);
 
   Future<void> load() async {
-    await repository.cleanupTrash();
     final list = repository.getAll();
     emit(list);
   }
@@ -17,15 +16,6 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
   Future<void> addEntry(EmotionEntry entry) async {
     await repository.addEntry(entry);
     await load();
-  }
-
-  Future<void> add(Map<String, int> emotions, {String title = ''}) async {
-    final entry = EmotionEntry(
-      dateTime: DateTime.now(),
-      title: title,
-      emotions: Map.from(emotions),
-    );
-    await addEntry(entry);
   }
 
   Future<void> update(
@@ -50,17 +40,37 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
   }
 
   Future<void> deleteToTrash(int index) async {
-    await repository.markDeleted(index);
+    final current = state[index];
+    final updated = EmotionEntry(
+      dateTime: current.dateTime,
+      title: current.title,
+      situationDescription: current.situationDescription,
+      personalNote: current.personalNote,
+      emotions: Map.from(current.emotions),
+      isDeleted: true,
+      deletedAt: DateTime.now(),
+    );
+    await repository.updateEntry(index, updated);
     await load();
   }
 
   Future<void> restore(int index) async {
-    await repository.restoreEntry(index);
+    final current = state[index];
+    final updated = EmotionEntry(
+      dateTime: current.dateTime,
+      title: current.title,
+      situationDescription: current.situationDescription,
+      personalNote: current.personalNote,
+      emotions: Map.from(current.emotions),
+      isDeleted: false,
+      deletedAt: null,
+    );
+    await repository.updateEntry(index, updated);
     await load();
   }
 
   Future<void> deleteForever(int index) async {
-    await repository.deleteForever(index);
+    await repository.deleteEntry(index);
     await load();
   }
 }

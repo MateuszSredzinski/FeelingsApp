@@ -226,6 +226,8 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
               situationDescription: appliedSituation,
               personalNote: appliedPersonalNote,
               emotions: Map<String, int>.from(selectedEmotions),
+              isDeleted: false,
+              deletedAt: null,
             );
 
             if (widget.entryIndex != null) {

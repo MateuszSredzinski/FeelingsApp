@@ -6,21 +6,21 @@ import 'package:hive/hive.dart';
 
 class EmotionEntry {
   String title;
-  String situationDescription;
-  String personalNote;
   DateTime dateTime;
   Map<String, int> emotions;
+  String situationDescription;
+  String personalNote;
   bool isDeleted;
   DateTime? deletedAt;
 
   EmotionEntry({
     required this.dateTime,
     this.title = '',
+    required this.emotions,
     this.situationDescription = '',
     this.personalNote = '',
     this.isDeleted = false,
     this.deletedAt,
-    required this.emotions,
   });
 }
 
@@ -31,47 +31,60 @@ class EmotionEntryAdapter extends TypeAdapter<EmotionEntry> {
 
   @override
   EmotionEntry read(BinaryReader reader) {
-    final title = reader.read();
+    final title = reader.read() as String;
     final dateTime = reader.read() as DateTime;
     final emotionsDynamic = reader.read() as Map;
 
-    // wartości domyślne dla kompatybilności ze starymi zapisami
-    bool isDeleted = false;
-    DateTime? deletedAt;
     String situationDescription = '';
     String personalNote = '';
+    bool isDeleted = false;
+    DateTime? deletedAt;
 
-    if (reader.availableBytes > 0) {
-      try {
-        isDeleted = reader.read() as bool;
-        deletedAt = reader.read() as DateTime?;
-        situationDescription = reader.read() as String? ?? '';
-        personalNote = reader.read() as String? ?? '';
-      } catch (_) {
-        // zachowaj wartości domyślne, jeśli stary format nie zawiera pól
+    // Czytanie elastyczne: wspiera starszą kolejność pól.
+    final remaining = <dynamic>[];
+    while (reader.availableBytes > 0) {
+      remaining.add(reader.read());
+    }
+    for (final v in remaining) {
+      if (v is String && situationDescription.isEmpty) {
+        situationDescription = v;
+        continue;
+      }
+      if (v is String && personalNote.isEmpty) {
+        personalNote = v;
+        continue;
+      }
+      if (v is bool && !isDeleted) {
+        isDeleted = v;
+        continue;
+      }
+      if (v is DateTime && deletedAt == null) {
+        deletedAt = v;
+        continue;
       }
     }
 
     final emotions = Map<String, int>.from(emotionsDynamic.map((k, v) => MapEntry(k as String, v as int)));
     return EmotionEntry(
-      title: title as String,
+      title: title,
       dateTime: dateTime,
       emotions: emotions,
-      isDeleted: isDeleted,
-      deletedAt: deletedAt,
       situationDescription: situationDescription,
       personalNote: personalNote,
+      isDeleted: isDeleted,
+      deletedAt: deletedAt,
     );
   }
 
   @override
   void write(BinaryWriter writer, EmotionEntry obj) {
-    writer.write(obj.title);
-    writer.write(obj.dateTime);
-    writer.write(obj.emotions);
-    writer.write(obj.isDeleted);
-    writer.write(obj.deletedAt);
-    writer.write(obj.situationDescription);
-    writer.write(obj.personalNote);
+    writer
+      ..write(obj.title)
+      ..write(obj.dateTime)
+      ..write(obj.emotions)
+      ..write(obj.situationDescription)
+      ..write(obj.personalNote)
+      ..write(obj.isDeleted)
+      ..write(obj.deletedAt);
   }
 }
