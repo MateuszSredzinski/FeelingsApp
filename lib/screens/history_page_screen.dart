@@ -57,8 +57,21 @@ class EmotionHistoryPage extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
                   title: Text(entry.title.isEmpty ? "Bez tytułu" : entry.title),
-                  subtitle:
-                      Text(entry.emotions.entries.map((e) => '${e.key}: ${e.value}/6').join(', ')),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        entry.emotions.isNotEmpty
+                            ? entry.emotions.entries.map((e) => '${e.key}: ${e.value}/6').join(', ')
+                            : 'Brak wybranych emocji',
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisu',
+                        style: const TextStyle(fontStyle: FontStyle.italic),
+                      ),
+                    ],
+                  ),
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -105,6 +118,11 @@ class EmotionHistoryPage extends StatelessWidget {
                   const Text(
                     'Wybrane emocje',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisu',
+                    style: const TextStyle(fontStyle: FontStyle.italic),
                   ),
                   const SizedBox(height: 12),
                   Column(
