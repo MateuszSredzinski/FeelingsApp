@@ -196,14 +196,28 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
                         ),
                       );
                     }
+                    final preview = (typedNote ?? '').split('\n').first.trim();
                     return Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       child: InkWell(
                         onTap: _openTextEntryPopup,
-                        child: const Center(
-                          child: Text(
-                            'Wpis',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Wpis',
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              if (preview.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  preview,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                       ),

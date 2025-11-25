@@ -56,7 +56,11 @@ class EmotionHistoryPage extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
-                  title: Text(entry.title.isEmpty ? "Bez tytułu" : entry.title),
+                  title: Text(
+                    entry.personalNote.isNotEmpty
+                        ? entry.personalNote.split('\n').first
+                        : (entry.title.isNotEmpty ? entry.title : 'Brak wpisu'),
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -120,47 +124,58 @@ class EmotionHistoryPage extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
+                  if (_groupEntryByMain(entry).isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: _groupEntryByMain(entry).entries.map((group) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(group.key, style: const TextStyle(fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 4),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: group.value.map((emotion) {
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ElevatedButton(
+                                        style:
+                                            ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                                        onPressed: null,
+                                        child: Text(
+                                          emotion.key,
+                                          style: const TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      _buildIntensityDots(emotion.value),
+                                    ],
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    )
+                  else
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 12),
+                      child: Text('Brak wybranych emocji'),
+                    ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Notatka dla siebie',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 4),
                   Text(
                     entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisu',
                     style: const TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                  const SizedBox(height: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _groupEntryByMain(entry).entries.map((group) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(group.key, style: const TextStyle(fontWeight: FontWeight.w600)),
-                            const SizedBox(height: 4),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: group.value.map((emotion) {
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ElevatedButton(
-                                      style:
-                                          ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                                      onPressed: null,
-                                      child: Text(
-                                        emotion.key,
-                                        style: const TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    _buildIntensityDots(emotion.value),
-                                  ],
-                                );
-                              }).toList(),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
                   ),
                   const SizedBox(height: 20),
                   Row(

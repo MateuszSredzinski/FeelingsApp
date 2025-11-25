@@ -13,6 +13,7 @@ type to terminal:
 23.11.2025 project repair 
 24.11.2025 Split to two screens (emotions choose | history)
 24.11.2025 Selected Emotions edit | Summary in history | main emotions usable | user exp improving
+25.11.2025 merge experimental | a lot of todo implemented | notes implemented | UX improving
 
 
 W planach:
@@ -28,6 +29,10 @@ w ustawieniach regulacja stopnia emocji
 *Po wybraniu pod emocji w emocjach pokazanie ze juz cos sie wybralo - no nie wiem czy bedzie na to miejsce w tym containerze
 
 *dodać 8sme okno z notatką do dodania + podkreslenie ze juz cos tam sie zapisalo
+
+*w planach jest takze zrobienie lupy na haptic na nacisniecie na kafelek co jest w srodku 
+
+*w planach integracja riverpod
 
 Done: 
 24.11.2025
