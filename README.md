@@ -17,8 +17,11 @@ type to terminal:
 
 W planach:
 
-ustawienia imienia, export danych w zębatce tyle rzeczy będzie
+*ustawienia imienia, export danych w zębatce tyle rzeczy będzie
 w ustawieniach regulacja stopnia emocji 
+
+*dodawanie notatki w głównym ekranie
+*oznaczenie kontenera w ktorym jest coś wybrane 
 
 *Testowanie na android na fizycznym
 
