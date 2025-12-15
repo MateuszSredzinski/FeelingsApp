@@ -12,14 +12,22 @@ class TextEntryPopup extends StatefulWidget {
 }
 
 class _TextEntryPopupState extends State<TextEntryPopup> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller;
+  bool _canSave = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialText.isNotEmpty) {
-      _controller.text = widget.initialText;
-    }
+    _controller = TextEditingController(text: widget.initialText);
+    _canSave = _controller.text.trim().isNotEmpty;
+    _controller.addListener(() {
+      final enabled = _controller.text.trim().isNotEmpty;
+      if (enabled != _canSave) {
+        setState(() {
+          _canSave = enabled;
+        });
+      }
+    });
   }
 
   @override
@@ -28,11 +36,11 @@ class _TextEntryPopupState extends State<TextEntryPopup> {
     super.dispose();
   }
 
-  Future<void> _save() async {
+  void _onSave() {
     final fullText = _controller.text.trim();
     if (fullText.isEmpty) return;
     widget.onSave(fullText);
-    if (mounted) Navigator.of(context).pop();
+    Navigator.of(context).pop();
   }
 
   @override
@@ -47,23 +55,43 @@ class _TextEntryPopupState extends State<TextEntryPopup> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'WPIS',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 TextField(
                   controller: _controller,
                   maxLines: null,
                   keyboardType: TextInputType.multiline,
                   decoration: const InputDecoration(
-                    labelText: 'Wpis',
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _save,
-                    child: const Text('Zapisz'),
-                  ),
-                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Anuluj'),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      onPressed: _canSave ? _onSave : null,
+                      child: const Text('Zapisz'),
+                    ),
+                  ],
+                )
               ],
             ),
           ),

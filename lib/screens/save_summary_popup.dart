@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:feelings/widgets/feelings_dialog.dart';
 
@@ -6,14 +8,12 @@ class SaveSummaryPopup extends StatefulWidget {
     super.key,
     required this.selectedEmotions,
     required this.onConfirm,
-    this.initialNote,
     this.initialPersonalNote,
     required this.groupedEmotions,
   });
 
   final Map<String, int> selectedEmotions;
   final Future<void> Function(String situation, String personalNote) onConfirm;
-  final String? initialNote;
   final String? initialPersonalNote;
   final Map<String, List<MapEntry<String, int>>> groupedEmotions;
 
@@ -22,15 +22,11 @@ class SaveSummaryPopup extends StatefulWidget {
 }
 
 class _SaveSummaryPopupState extends State<SaveSummaryPopup> {
-  final TextEditingController _situationController = TextEditingController();
   final TextEditingController _personalNoteController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialNote != null && widget.initialNote!.isNotEmpty) {
-        _situationController.text = widget.initialNote!;
-    }
     if (widget.initialPersonalNote != null && widget.initialPersonalNote!.isNotEmpty) {
       _personalNoteController.text = widget.initialPersonalNote!;
     }
@@ -38,7 +34,6 @@ class _SaveSummaryPopupState extends State<SaveSummaryPopup> {
 
   @override
   void dispose() {
-    _situationController.dispose();
     _personalNoteController.dispose();
     super.dispose();
   }
@@ -56,19 +51,22 @@ class _SaveSummaryPopupState extends State<SaveSummaryPopup> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-                const Text(
-                  'Podsumowanie emocji',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+              Padding(
+  padding: const EdgeInsets.symmetric(),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      const Text(
+        'Podsumowanie emocji',
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      IconButton(
+        icon: const Icon(Icons.close),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+    ],
+  ),
+),
                 const SizedBox(height: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,38 +93,29 @@ class _SaveSummaryPopupState extends State<SaveSummaryPopup> {
                         ],
                       ),
                     );
-                  }).toList(),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _situationController,
-                  decoration: const InputDecoration(
-                    labelText: 'Opis sytuacji',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _personalNoteController,
-                  decoration: const InputDecoration(
-                    labelText: 'Notatka dla siebie',
+                }).toList(),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _personalNoteController,
+                decoration: const InputDecoration(
+                  labelText: 'Notatka dla siebie',
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 3,
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await widget.onConfirm(
-                        _situationController.text.trim(),
-                        _personalNoteController.text.trim(),
-                      );
-                      if (mounted) {
-                        Navigator.of(context).pop();
-                      }
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await widget.onConfirm(
+                      '',
+                      _personalNoteController.text.trim(),
+                    );
+                    if (mounted) {
+                      Navigator.of(context).pop();
+                    }
                     },
                     child: const Text('Zatwierdź zapis'),
                   ),

@@ -49,6 +49,7 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
   void _openPopupFor(Emotion emotion) {
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (context) {
         return StatefulBuilder(builder: (context, setPopupState) {
           return FeelingsDialog(
@@ -205,10 +206,10 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text(
-                                'Wpis',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
+                      const Text(
+                        'WPIS',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
                               if (preview.isNotEmpty) ...[
                                 const SizedBox(height: 6),
                                 Text(
@@ -247,14 +248,14 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.4),
+      barrierDismissible: false,
       builder: (dialogContext) {
         return SaveSummaryPopup(
           selectedEmotions: Map<String, int>.from(selectedEmotions),
-          initialNote: widget.initialNote,
           initialPersonalNote: typedNote ?? widget.initialPersonalNote,
           groupedEmotions: _groupSelectedByMain(),
           onConfirm: (situation, personalNote) async {
-            final appliedSituation = situation.isEmpty ? (widget.initialNote ?? '') : situation;
+            final appliedSituation = widget.initialNote ?? '';
             final appliedPersonalNote = personalNote.isEmpty
                 ? (typedNote ?? widget.initialPersonalNote ?? '')
                 : personalNote;
@@ -299,6 +300,7 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.4),
+      barrierDismissible: false,
       builder: (context) => TextEntryPopup(
         initialText: typedNote ?? '',
         onSave: (text) {

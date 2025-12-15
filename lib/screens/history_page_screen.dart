@@ -56,11 +56,11 @@ class EmotionHistoryPage extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
-                  title: Text(
-                    entry.personalNote.isNotEmpty
-                        ? entry.personalNote.split('\n').first
-                        : (entry.title.isNotEmpty ? entry.title : 'Brak wpisu'),
-                  ),
+                  // title: Text(
+                  //   entry.personalNote.isNotEmpty
+                  //       ? entry.personalNote.split('\n').first
+                  //       : (entry.title.isNotEmpty ? entry.title : 'Brak wpisuX'),
+                  // ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -71,7 +71,7 @@ class EmotionHistoryPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisu',
+                        entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisuY',
                         style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
                     ],
@@ -174,7 +174,7 @@ class EmotionHistoryPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisu',
+                    entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisuZ',
                     style: const TextStyle(fontStyle: FontStyle.italic),
                   ),
                   const SizedBox(height: 20),

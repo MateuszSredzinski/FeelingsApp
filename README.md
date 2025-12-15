@@ -46,7 +46,6 @@ Flutter UI Glassmorphism & Neumorphism
 
 *Definicje emocji w oddzielnym okienku w ustawieniach
 
-
 *kosz na wpisy, ktore sie usuwaja po 30 dniach, gdzie kosz - moze w ustwieniach, kosz - przekierowanie do emocji w koszu, 
 
 *Zmiana podsumowania, w pop up dać wyświetlanie spod jakiej emocji głównej są dane emocje ktore są wybrane.
@@ -54,5 +53,15 @@ notatka we wpisie, notatka w glownym ekranie - jakos ladnie nazwac
 
 
 
-FIXY to do:
+FIXY DONE:
+
+*w ekranie edycji emocji, podczas gdy nie ma wpisu nie da się zapisać pustego wpisu (jak się dostać do tego widgetu. Historia -> Rekord bez wpisu -> Wpis -> nie da się zapisać), albo raczej inaczej to sprawdzic - nie da sie zapisac pustego wpisu, wiec jakos inaczej to trzeba zagospodarowac - done 15.12.2025
+
+*usunac _situationController - nie potrzebny jest calkowicie do usuniecia z summary opis sytuacji (jest obok notatka dla siebie) - done 15.12.2025
+
+*Podsumowanie emocji - Label/ tytul pop upa jesy za w nisko powinien byc na rowno z X krzyzywiek zamkniecia pop up - done 15.12.2025 
+
+TO DO 15.12.2025
+* 15.12.2025 'wybrane emocje' - pop up do poprawy
 *po edycji emocji z historii i nadpisaniu, ekran nie wraca do historii/podgladu emocji
+*data utworzenia jest ale przy edytowaniu data sie zmienia, powinna sie pojawiac data ostatniej edycji
