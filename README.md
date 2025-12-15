@@ -1,67 +1,44 @@
 # FeelingsApp
-Name Your Emotions
+Name your emotions, capture context, and track how you feel over time.
 
-Emulator launch
-type to terminal: 
-1. emulator -avd pixel_emulator
-2. flutter run
+## Run the app
+- Start emulator: `emulator -avd pixel_emulator`
+- Launch: `flutter run`
 
+## Milestones (2025)
+- 01.11 — postawiony szkielet aplikacji.
+- 10.11 — uporządkowana lista emocji (PL) i refaktoryzacja.
+- 20.11 — dodany cubit bazy danych, repo na GitHubie.
+- 23.11 — naprawy po pierwszym rozjechaniu projektu.
+- 24.11 — podział na dwa ekrany (wybór emocji | historia); edycja wybranych emocji; podsumowanie w historii; pierwsze usprawnienia UX.
+- 24.11 — przycisk zapisz na głównym ekranie po wyborze emocji; w pop-upie z podemocjami przycisk „Zatwierdź” (zamyka pop-up, jeszcze bez zapisu do DB); po „Zapisz” wyskakuje pop-up z podsumowaniem; dodane notatki w nowym pop-upie.
+- 25.11 — merge branchy experimental; wiele TODO zamkniętych, notatki i kolejne usprawnienia UX.
 
-1.11.2025 Build skeleton off app
-10.11.2025 Added sorted and refactored emotions in pl lang
-20.11.2025 Added data base cubit | creating repo on github
-23.11.2025 project repair 
-24.11.2025 Split to two screens (emotions choose | history)
-24.11.2025 Selected Emotions edit | Summary in history | main emotions usable | user exp improving
-25.11.2025 merge experimental | a lot of todo implemented | notes implemented | UX improving
+## Co działa teraz
+- Wybór emocji, edycja i podsumowanie w historii dwóch ekranów.
+- Przepływ z popupem podemocji i podsumowaniem po „Zapisz”.
+- Dodawanie notatek w dedykowanym pop-upie.
 
+## Eksperymenty (branch experimental)
+- Szersze pop-upy, glassmorphism/neumorphism, animated gradient border.
+- Definicje emocji w oddzielnym oknie ustawień.
+- Kosz na wpisy z auto-usuwaniem po 30 dniach (umiejscowienie w ustawieniach).
+- Podsumowanie pokazujące, spod jakiej emocji głównej pochodzą wybrane podemocje.
+- Nazewnictwo notatek w historii i na głównym ekranie do dopracowania.
 
-W planach:
+## Ostatnie poprawki (15.12)
+- Blokada zapisu pustego wpisu w edycji emocji (Historia → Rekord → Wpis).
+- Usunięty `_situationController`; opis sytuacji wycięty z podsumowania.
+- Wyrównany tytuł pop-upa podsumowania do ikony zamknięcia.
 
-*ustawienia imienia, export danych w zębatce tyle rzeczy będzie
-w ustawieniach regulacja stopnia emocji 
-
-*dodawanie notatki w głównym ekranie
-*oznaczenie kontenera w ktorym jest coś wybrane 
-
-*Testowanie na android na fizycznym
-
-*Po wybraniu pod emocji w emocjach pokazanie ze juz cos sie wybralo - no nie wiem czy bedzie na to miejsce w tym containerze
-
-*dodać 8sme okno z notatką do dodania + podkreslenie ze juz cos tam sie zapisalo
-
-*w planach jest takze zrobienie lupy na haptic na nacisniecie na kafelek co jest w srodku 
-
-*w planach integracja riverpod
-
-Done: 
-24.11.2025
-*Dodanie w głównym ekranie, po wybraniu jakiejkolwiek emocji przycisku zapisz. Zmiana w pop upie z pod emocjami przycisku z zapisz emocje na Zatwierdź, który jeszcze nie zapisuje emocji do bazy danych tylko zamyka pop up. Po przycisku zapisz pojawia się pop up z podsumowaniem tak jak po wejsciu w historii.
-Dodawanie notatek. To będzie inny pop up. Bo bedzie to pop up podsumowujący a nie ten z historii.
-
-24.11.2025 - experimental branch
-
-*Inny UI, wieksze pop upy - wykorzystaj: Animated gradien border
-Flutter UI Glassmorphism & Neumorphism
-
-*Definicje emocji w oddzielnym okienku w ustawieniach
-
-*kosz na wpisy, ktore sie usuwaja po 30 dniach, gdzie kosz - moze w ustwieniach, kosz - przekierowanie do emocji w koszu, 
-
-*Zmiana podsumowania, w pop up dać wyświetlanie spod jakiej emocji głównej są dane emocje ktore są wybrane.
-notatka we wpisie, notatka w glownym ekranie - jakos ladnie nazwac
-
-
-
-FIXY DONE:
-
-*w ekranie edycji emocji, podczas gdy nie ma wpisu nie da się zapisać pustego wpisu (jak się dostać do tego widgetu. Historia -> Rekord bez wpisu -> Wpis -> nie da się zapisać), albo raczej inaczej to sprawdzic - nie da sie zapisac pustego wpisu, wiec jakos inaczej to trzeba zagospodarowac - done 15.12.2025
-
-*usunac _situationController - nie potrzebny jest calkowicie do usuniecia z summary opis sytuacji (jest obok notatka dla siebie) - done 15.12.2025
-
-*Podsumowanie emocji - Label/ tytul pop upa jesy za w nisko powinien byc na rowno z X krzyzywiek zamkniecia pop up - done 15.12.2025 
-
-TO DO 15.12.2025
-* 15.12.2025 'wybrane emocje' - pop up do poprawy
-*po edycji emocji z historii i nadpisaniu, ekran nie wraca do historii/podgladu emocji
-*data utworzenia jest ale przy edytowaniu data sie zmienia, powinna sie pojawiac data ostatniej edycji
+## Roadmap / Backlog
+- Dopracować pop-up „Wybrane emocje”.
+- Po edycji emocji z historii wracać do historii/podglądu.
+- Zachować datę utworzenia, dodać datę ostatniej edycji.
+- Ustawienia: imię użytkownika, regulacja natężenia emocji, eksport danych (zębatka).
+- Wyróżnianie kontenera z wybraną emocją/podemocją; sygnalizacja wybranych podemocji.
+- Dodanie 8. okna z notatką i podkreśleniem, że coś już zapisano.
+- Dodawanie notatki bezpośrednio na głównym ekranie.
+- Testy na fizycznym Androidzie.
+- Lupa/haptic na kafelku z emocją (lepszy feedback dotykowy).
+- Integracja Riverpod.
