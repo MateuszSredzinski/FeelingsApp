@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:feelings/theme/app_gradients.dart';
 
 class FeelingsDialog extends StatefulWidget {
   const FeelingsDialog({
@@ -51,21 +52,10 @@ class _FeelingsDialogState extends State<FeelingsDialog> with SingleTickerProvid
             animation: _controller,
             builder: (context, child) {
               final angle = _controller.value * 2 * pi;
-              final colors = [
-                Colors.blue.withOpacity(0.8),
-                Colors.purple.withOpacity(0.7),
-                Colors.cyan.withOpacity(0.7),
-              ];
-
               return Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(22),
-                  gradient: SweepGradient(
-                    startAngle: 0,
-                    endAngle: 2 * pi,
-                    colors: colors,
-                    transform: GradientRotation(angle),
-                  ),
+                  gradient: AppGradients.animatedSweep(angle),
                 ),
                 child: Container(
                   margin: const EdgeInsets.all(3),

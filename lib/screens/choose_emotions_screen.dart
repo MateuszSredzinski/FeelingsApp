@@ -3,6 +3,7 @@ import 'package:feelings/cubbit/entry_cubbit.dart';
 import 'package:feelings/emotions_data.dart';
 import 'package:feelings/emotions_data_hive_entry.dart';
 import 'package:feelings/main.dart';
+import 'package:feelings/theme/app_gradients.dart';
 import 'package:feelings/settings/settings_screen.dart';
 import 'package:feelings/screens/save_summary_popup.dart';
 import 'package:feelings/widgets/feelings_dialog.dart';
@@ -153,6 +154,8 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
     final hasSelection =
         selectedEmotions.isNotEmpty || (typedNote != null && typedNote!.isNotEmpty);
     final totalItems = mainEmotions.length + 1; // plus "Wpis"
+    final notePreview = (typedNote ?? '').split('\n').first.trim();
+    final hasNote = notePreview.isNotEmpty;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => FocusScope.of(context).unfocus(),
@@ -186,41 +189,105 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
                   itemBuilder: (context, index) {
                     if (index < mainEmotions.length) {
                       final e = mainEmotions[index];
+                      final selectedForMain = selectedEmotions.entries
+                          .where((entry) => e.subEmotions.contains(entry.key))
+                          .map((entry) => entry.key)
+                          .toList();
+                      final count = selectedForMain.length;
+                      final hasSelectionForMain = count > 0;
                       return Card(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: hasSelectionForMain ? 6 : 2,
+                        shadowColor:
+                            hasSelectionForMain ? const Color(0xFFE91E63).withOpacity(0.2) : null,
                         child: InkWell(
                           onTap: () => _openPopupFor(e),
-                          child: Center(
-                            child: Text(
-                              e.name,
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 180),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  gradient: hasSelectionForMain ? AppGradients.frozenSweep() : null,
+                                  border: hasSelectionForMain
+                                      ? Border.all(
+                                          width: 1.8,
+                                          color: AppGradients.sweepColors.first.withOpacity(0.8),
+                                        )
+                                      : null,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    e.name,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (hasSelectionForMain)
+                                Positioned(
+                                  top: -6,
+                                  right: -6,
+                                  child: IgnorePointer(
+                                    child: _CountBadge(count: count),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       );
                     }
-                    final preview = (typedNote ?? '').split('\n').first.trim();
                     return Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: hasNote ? 6 : 2,
+                      shadowColor:
+                          hasNote ? AppGradients.sweepColors.first.withOpacity(0.2) : null,
                       child: InkWell(
                         onTap: _openTextEntryPopup,
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                      const Text(
-                        'WPIS',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                              if (preview.isNotEmpty) ...[
-                                const SizedBox(height: 6),
-                                Text(
-                                  preview,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                        borderRadius: BorderRadius.circular(12),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            gradient: hasNote ? AppGradients.frozenSweep() : null,
+                            border: hasNote
+                                ? Border.all(
+                                    width: 1.8,
+                                    color: AppGradients.sweepColors.first.withOpacity(0.8),
+                                  )
+                                : null,
+                          ),
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  'WPIS',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
                                 ),
+                                if (notePreview.isNotEmpty) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    notePreview,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontStyle: FontStyle.italic,
+                                      color: hasNote ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                         ),
                       ),
@@ -336,5 +403,42 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
       grouped[main]!.add(MapEntry(sub, value));
     });
     return grouped;
+  }
+}
+
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = count >= 100 ? '99+' : '$count';
+    return Container(
+      width: 26,
+      height: 26,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.red,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 11,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 }

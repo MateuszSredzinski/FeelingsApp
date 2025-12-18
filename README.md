@@ -38,12 +38,14 @@ Name your emotions, capture context, and track how you feel over time.
 - Dodanie 8. okna z notatką i podkreśleniem, że coś już zapisano. Dodawanie notatki na głównym ekranie.
 - Po edycji emocji z historii wracać do historii/podglądu wyedytowanej karty emocji
 - obsłuzenie UX uzytkownika - po zapisie emocji - przekierowanie do ekranu historii emocji i podświetlenie chwilowe i powiekszanie zapisanego rekordu - zamiast pop up ze sie udalo.
+- Wyróżnianie kontenera z wybraną emocją/podemocją; sygnalizacja wybranych podemocji.
 
 ## Roadmap / Backlog
-
-- Zachować datę utworzenia, dodać datę ostatniej edycji.
+- Wyrównać kafelki z emocjami w środku emocji głównych 
+- Zachować datę utworzenia, dodać datę ostatniej edycji. Zmienić połoenie na kafelku: górny prawy róg.
 - Ustawienia: imię użytkownika, regulacja natężenia emocji, eksport danych (zębatka).
-- Wyróżnianie kontenera z wybraną emocją/podemocją; sygnalizacja wybranych podemocji.
+
 - Testy na fizycznym Androidzie.
 - Lupa/haptic na kafelku z emocją (lepszy feedback dotykowy).
 - Integracja Riverpod.
+- Dodać pytania do usera - co w Tobie? Co tam się wydarzyło?
