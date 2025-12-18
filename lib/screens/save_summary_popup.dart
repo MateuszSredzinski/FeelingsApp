@@ -114,7 +114,7 @@ class _SaveSummaryPopupState extends State<SaveSummaryPopup> {
                       _personalNoteController.text.trim(),
                     );
                     if (mounted) {
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(true);
                     }
                     },
                     child: const Text('Zatwierdź zapis'),

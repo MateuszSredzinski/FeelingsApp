@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:feelings/cubbit/entry_cubbit.dart';
 import 'package:feelings/emotions_data.dart';
 import 'package:feelings/emotions_data_hive_entry.dart';
@@ -8,8 +10,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:feelings/widgets/feelings_dialog.dart';
 import 'package:feelings/settings/settings_screen.dart';
 
-class EmotionHistoryPage extends StatelessWidget {
-  const EmotionHistoryPage({super.key});
+class EmotionHistoryPage extends StatefulWidget {
+  const EmotionHistoryPage({
+    super.key,
+    this.highlightedDateTime,
+    this.onHighlightConsumed,
+  });
+
+  final DateTime? highlightedDateTime;
+  final VoidCallback? onHighlightConsumed;
+
+  @override
+  State<EmotionHistoryPage> createState() => _EmotionHistoryPageState();
+}
+
+class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
+  final ScrollController _scrollController = ScrollController();
+  DateTime? _activeHighlight;
+  Timer? _flashTimer;
+  bool _flashOn = false;
 
   @override
   Widget build(BuildContext context) {
@@ -48,45 +67,74 @@ class EmotionHistoryPage extends StatelessWidget {
             return const Center(child: Text('Brak zapisanych wpisów'));
           }
           return ListView.builder(
+            controller: _scrollController,
             itemCount: visibleEntries.length,
             itemBuilder: (context, index) {
               final item = visibleEntries[index];
               final entry = item.value;
               final originalIndex = item.key;
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: ListTile(
-                  // title: Text(
-                  //   entry.personalNote.isNotEmpty
-                  //       ? entry.personalNote.split('\n').first
-                  //       : (entry.title.isNotEmpty ? entry.title : 'Brak wpisuX'),
-                  // ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        entry.emotions.isNotEmpty
-                            ? entry.emotions.entries.map((e) => '${e.key}: ${e.value}/6').join(', ')
-                            : 'Brak wybranych emocji',
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisuY',
-                        style: const TextStyle(fontStyle: FontStyle.italic),
-                      ),
-                    ],
+              final isHighlighted =
+                  _activeHighlight != null && entry.dateTime.isAtSameMomentAs(_activeHighlight!);
+
+              const magenta = Color(0xFFE91E63);
+              final highlightColor =
+                  isHighlighted ? (magenta.withOpacity(_flashOn ? 0.22 : 0.10)) : Colors.transparent;
+              final shadowColor =
+                  isHighlighted ? magenta.withOpacity(_flashOn ? 0.45 : 0.25) : Colors.transparent;
+
+              return AnimatedScale(
+                duration: const Duration(milliseconds: 220),
+                scale: isHighlighted && _flashOn ? 1.02 : 1.0,
+                curve: Curves.easeInOut,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOut,
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: highlightColor,
+                    boxShadow: isHighlighted
+                        ? [
+                            BoxShadow(
+                              color: shadowColor,
+                              blurRadius: 18,
+                              spreadRadius: 3,
+                            ),
+                          ]
+                        : null,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(_formatTime(entry.dateTime)),
-                      const SizedBox(height: 4),
-                      Text('${_formatDate(entry.dateTime)}, ${_weekdayName(entry.dateTime)}'),
-                    ],
+                  child: Card(
+                    margin: EdgeInsets.zero,
+                    elevation: 0,
+                    child: ListTile(
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            entry.emotions.isNotEmpty
+                                ? entry.emotions.entries.map((e) => '${e.key}: ${e.value}/6').join(', ')
+                                : 'Brak wybranych emocji',
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisuY',
+                            style: const TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        ],
+                      ),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(_formatTime(entry.dateTime)),
+                          const SizedBox(height: 4),
+                          Text('${_formatDate(entry.dateTime)}, ${_weekdayName(entry.dateTime)}'),
+                        ],
+                      ),
+                      onTap: () => _showEntryDialog(context, entry, originalIndex),
+                      onLongPress: () => _confirmDelete(context, originalIndex),
+                    ),
                   ),
-                  onTap: () => _showEntryDialog(context, entry, originalIndex),
-                  onLongPress: () => _confirmDelete(context, originalIndex),
                 ),
               );
             },
@@ -94,6 +142,61 @@ class EmotionHistoryPage extends StatelessWidget {
         },
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _applyHighlight(widget.highlightedDateTime);
+  }
+
+  @override
+  void didUpdateWidget(covariant EmotionHistoryPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.highlightedDateTime != null &&
+        widget.highlightedDateTime != oldWidget.highlightedDateTime) {
+      _applyHighlight(widget.highlightedDateTime);
+    }
+  }
+
+  void _applyHighlight(DateTime? date) {
+    if (date == null) return;
+    _flashTimer?.cancel();
+    _activeHighlight = date;
+    _flashOn = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+      setState(() {});
+      int ticks = 0;
+      _flashTimer = Timer.periodic(const Duration(milliseconds: 320), (timer) {
+        if (!mounted) {
+          timer.cancel();
+          return;
+        }
+        setState(() => _flashOn = !_flashOn);
+        ticks++;
+        if (ticks >= 12) {
+          timer.cancel();
+          setState(() {
+            _activeHighlight = null;
+            _flashOn = false;
+          });
+          widget.onHighlightConsumed?.call();
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _flashTimer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _showEntryDialog(BuildContext context, EmotionEntry entry, int index) {
@@ -180,14 +283,18 @@ class EmotionHistoryPage extends StatelessWidget {
                         icon: const Icon(Icons.delete_outline),
                         onPressed: () {
                           Navigator.of(dialogContext).pop();
-                          _confirmDelete(context, index);
+                          _confirmDelete(
+                            context,
+                            index,
+                            onCancel: () => _showEntryDialog(context, entry, index),
+                          );
                         },
                       ),
                       const Spacer(),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.of(dialogContext).pop();
-                          Navigator.of(context).push(
+                          final result = await Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => EmotionSelectPage(
                                 initialSelection: Map<String, int>.from(entry.emotions),
@@ -197,6 +304,12 @@ class EmotionHistoryPage extends StatelessWidget {
                               ),
                             ),
                           );
+                          if (result == true && context.mounted) {
+                            final updatedState = getIt<EntryCubit>().state;
+                            if (index >= 0 && index < updatedState.length) {
+                              _showEntryDialog(context, updatedState[index], index);
+                            }
+                          }
                         },
                         child: const Text('Edytuj'),
                       ),
@@ -216,7 +329,7 @@ class EmotionHistoryPage extends StatelessWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, int index) {
+  void _confirmDelete(BuildContext context, int index, {VoidCallback? onCancel}) {
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.4),
@@ -239,7 +352,10 @@ class EmotionHistoryPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop();
+                        if (onCancel != null) onCancel();
+                      },
                       child: const Text('Anuluj'),
                     ),
                     const SizedBox(width: 12),

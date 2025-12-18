@@ -16,12 +16,14 @@ class EmotionSelectPage extends StatefulWidget {
     this.entryIndex,
     this.initialNote,
     this.initialPersonalNote,
+    this.onEntryCreated,
   });
 
   final Map<String, int>? initialSelection;
   final int? entryIndex;
   final String? initialNote;
   final String? initialPersonalNote;
+  final void Function(DateTime createdAt)? onEntryCreated;
 
   @override
   State<EmotionSelectPage> createState() => _EmotionSelectPageState();
@@ -244,8 +246,10 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
     );
   }
 
-  void _openSummaryPopup() {
-    showDialog(
+  Future<void> _openSummaryPopup() async {
+    final isEditing = widget.entryIndex != null;
+    DateTime? createdAt;
+    final result = await showDialog<bool>(
       context: context,
       barrierColor: Colors.black.withOpacity(0.4),
       barrierDismissible: false,
@@ -280,20 +284,25 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
               );
             } else {
               await cubit.addEntry(entry);
+              createdAt = entry.dateTime;
             }
 
             setState(() {
               selectedEmotions.clear();
               typedNote = null;
             });
-
-            if (widget.entryIndex != null && mounted) {
-              Navigator.of(context).pop();
-            }
           },
         );
       },
     );
+
+    if (result == true && mounted) {
+      if (isEditing) {
+        Navigator.of(context).pop(true);
+      } else if (createdAt != null) {
+        widget.onEntryCreated?.call(createdAt!);
+      }
+    }
   }
 
   void _openTextEntryPopup() {

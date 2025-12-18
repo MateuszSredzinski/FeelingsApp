@@ -53,13 +53,24 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int currentIndex = 0;
 
-  final screens = const [
-    EmotionSelectPage(),
-    EmotionHistoryPage(),
-  ];
+  DateTime? _highlightedEntryDate;
+
+  void _handleNewEntry(DateTime createdAt) {
+    setState(() {
+      _highlightedEntryDate = createdAt;
+      currentIndex = 1;
+    });
+  }
 
  @override
 Widget build(BuildContext context) {
+  final screens = [
+    EmotionSelectPage(onEntryCreated: _handleNewEntry),
+    EmotionHistoryPage(
+      highlightedDateTime: _highlightedEntryDate,
+      onHighlightConsumed: () => setState(() => _highlightedEntryDate = null),
+    ),
+  ];
   return Scaffold(
     body: IndexedStack(
       index: currentIndex,
