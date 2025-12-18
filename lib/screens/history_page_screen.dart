@@ -110,20 +110,15 @@ class EmotionHistoryPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      const Text('Wybrane emocje', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () => Navigator.of(dialogContext).pop(),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Wybrane emocje',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
                   if (_groupEntryByMain(entry).isNotEmpty)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,12 +169,12 @@ class EmotionHistoryPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisuZ',
+                    entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisu',
                     style: const TextStyle(fontStyle: FontStyle.italic),
                   ),
                   const SizedBox(height: 20),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       IconButton(
                         icon: const Icon(Icons.delete_outline),
@@ -188,6 +183,7 @@ class EmotionHistoryPage extends StatelessWidget {
                           _confirmDelete(context, index);
                         },
                       ),
+                      const Spacer(),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(dialogContext).pop();

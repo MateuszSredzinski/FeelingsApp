@@ -26,14 +26,18 @@ Name your emotions, capture context, and track how you feel over time.
 - Podsumowanie pokazujące, spod jakiej emocji głównej pochodzą wybrane podemocje.
 - Nazewnictwo notatek w historii i na głównym ekranie do dopracowania.
 
-## Ostatnie poprawki (15.12)
+## Poprawki (15.12)
 - Blokada zapisu pustego wpisu w edycji emocji (Historia → Rekord → Wpis).
 - Usunięty `_situationController`; opis sytuacji wycięty z podsumowania.
 - Wyrównany tytuł pop-upa podsumowania do ikony zamknięcia.
 
+## Poprawki (18.12)
+- Dopracowany pop-up „Wybrane emocje”.
+
+
 ## Roadmap / Backlog
-- Dopracować pop-up „Wybrane emocje”.
 - Po edycji emocji z historii wracać do historii/podglądu.
+- po anulowaniu usunięcia karty emocji wracaj do ekranu z podsumowaniem wybranych emcji
 - Zachować datę utworzenia, dodać datę ostatniej edycji.
 - Ustawienia: imię użytkownika, regulacja natężenia emocji, eksport danych (zębatka).
 - Wyróżnianie kontenera z wybraną emocją/podemocją; sygnalizacja wybranych podemocji.
