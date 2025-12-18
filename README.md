@@ -31,18 +31,19 @@ Name your emotions, capture context, and track how you feel over time.
 - Usunięty `_situationController`; opis sytuacji wycięty z podsumowania.
 - Wyrównany tytuł pop-upa podsumowania do ikony zamknięcia.
 
+
 ## Poprawki (18.12)
 - Dopracowany pop-up „Wybrane emocje”.
-
+- po anulowaniu usunięcia karty emocji wracaj do ekranu z podsumowaniem wybranych emcji
+- Dodanie 8. okna z notatką i podkreśleniem, że coś już zapisano. Dodawanie notatki na głównym ekranie.
+- Po edycji emocji z historii wracać do historii/podglądu wyedytowanej karty emocji
+- obsłuzenie UX uzytkownika - po zapisie emocji - przekierowanie do ekranu historii emocji i podświetlenie chwilowe i powiekszanie zapisanego rekordu - zamiast pop up ze sie udalo.
 
 ## Roadmap / Backlog
-- Po edycji emocji z historii wracać do historii/podglądu.
-- po anulowaniu usunięcia karty emocji wracaj do ekranu z podsumowaniem wybranych emcji
+
 - Zachować datę utworzenia, dodać datę ostatniej edycji.
 - Ustawienia: imię użytkownika, regulacja natężenia emocji, eksport danych (zębatka).
 - Wyróżnianie kontenera z wybraną emocją/podemocją; sygnalizacja wybranych podemocji.
-- Dodanie 8. okna z notatką i podkreśleniem, że coś już zapisano.
-- Dodawanie notatki bezpośrednio na głównym ekranie.
 - Testy na fizycznym Androidzie.
 - Lupa/haptic na kafelku z emocją (lepszy feedback dotykowy).
 - Integracja Riverpod.
