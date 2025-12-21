@@ -38,12 +38,15 @@ class EmotionEntryAdapter extends TypeAdapter<EmotionEntry> {
     final third = reader.read();
 
     DateTime? editedAt;
-    late Map emotionsDynamic;
+    Map emotionsDynamic = {};
     if (third is DateTime) {
       editedAt = third;
-      emotionsDynamic = reader.read() as Map;
-    } else {
-      emotionsDynamic = third as Map;
+      final maybeMap = reader.read();
+      if (maybeMap is Map) {
+        emotionsDynamic = maybeMap;
+      }
+    } else if (third is Map) {
+      emotionsDynamic = third;
     }
 
     String situationDescription = '';
@@ -57,6 +60,10 @@ class EmotionEntryAdapter extends TypeAdapter<EmotionEntry> {
       remaining.add(reader.read());
     }
     for (final v in remaining) {
+      if (v is Map && emotionsDynamic.isEmpty) {
+        emotionsDynamic = v;
+        continue;
+      }
       if (v is String && situationDescription.isEmpty) {
         situationDescription = v;
         continue;
