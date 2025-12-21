@@ -13,6 +13,7 @@ Name your emotions, capture context, and track how you feel over time.
 - 24.11 — podział na dwa ekrany (wybór emocji | historia); edycja wybranych emocji; podsumowanie w historii; pierwsze usprawnienia UX.
 - 24.11 — przycisk zapisz na głównym ekranie po wyborze emocji; w pop-upie z podemocjami przycisk „Zatwierdź” (zamyka pop-up, jeszcze bez zapisu do DB); po „Zapisz” wyskakuje pop-up z podsumowaniem; dodane notatki w nowym pop-upie.
 - 25.11 — merge branchy experimental; wiele TODO zamkniętych, notatki i kolejne usprawnienia UX.
+- Grudzień 2025 - kolejne usprawenienia UX i UI
 
 ## Co działa teraz
 - Wybór emocji, edycja i podsumowanie w historii dwóch ekranów.
@@ -58,3 +59,4 @@ Name your emotions, capture context, and track how you feel over time.
 - Paginacja na karcie historia
 - Wyszukiwarka emocji - lupka dla zaawansowanych
 - Ustawienia: imię użytkownika, regulacja natężenia emocji, eksport danych (zębatka).
+- logo aplikacji / logo ikony
