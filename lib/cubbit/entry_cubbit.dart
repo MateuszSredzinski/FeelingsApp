@@ -28,6 +28,7 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
     final current = state[index];
     final updated = EmotionEntry(
       dateTime: current.dateTime,
+      editedAt: DateTime.now(),
       title: title ?? current.title,
       situationDescription: situationDescription ?? current.situationDescription,
       personalNote: personalNote ?? current.personalNote,
@@ -43,6 +44,7 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
     final current = state[index];
     final updated = EmotionEntry(
       dateTime: current.dateTime,
+      editedAt: current.editedAt,
       title: current.title,
       situationDescription: current.situationDescription,
       personalNote: current.personalNote,
@@ -58,6 +60,7 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
     final current = state[index];
     final updated = EmotionEntry(
       dateTime: current.dateTime,
+      editedAt: current.editedAt,
       title: current.title,
       situationDescription: current.situationDescription,
       personalNote: current.personalNote,

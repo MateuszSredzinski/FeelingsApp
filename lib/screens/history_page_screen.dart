@@ -4,6 +4,7 @@ import 'package:feelings/cubbit/entry_cubbit.dart';
 import 'package:feelings/emotions_data.dart';
 import 'package:feelings/emotions_data_hive_entry.dart';
 import 'package:feelings/main.dart';
+import 'package:feelings/theme/app_gradients.dart';
 import 'package:feelings/screens/choose_emotions_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,11 +77,20 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
               final isHighlighted =
                   _activeHighlight != null && entry.dateTime.isAtSameMomentAs(_activeHighlight!);
 
-              const magenta = Color(0xFFE91E63);
-              final highlightColor =
-                  isHighlighted ? (magenta.withOpacity(_flashOn ? 0.22 : 0.10)) : Colors.transparent;
-              final shadowColor =
-                  isHighlighted ? magenta.withOpacity(_flashOn ? 0.45 : 0.25) : Colors.transparent;
+              final sweepColors = AppGradients.tileSweepColors;
+              final factor = _flashOn ? 1.15 : 0.9; // mocniejszy flash, nadal subtelny
+              final gradient = isHighlighted
+                  ? SweepGradient(
+                      colors: sweepColors
+                          .map((c) => c.withOpacity((c.opacity * factor).clamp(0.0, 1.0)))
+                          .toList(growable: false),
+                      startAngle: 0,
+                      endAngle: 2 * 3.1415926535,
+                    )
+                  : null;
+              final shadowColor = isHighlighted
+                  ? sweepColors.first.withOpacity(_flashOn ? 0.4 : 0.24)
+                  : Colors.transparent;
 
               return AnimatedScale(
                 duration: const Duration(milliseconds: 220),
@@ -91,7 +101,7 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
                   curve: Curves.easeOut,
                   margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: highlightColor,
+                    gradient: gradient,
                     boxShadow: isHighlighted
                         ? [
                             BoxShadow(
@@ -106,33 +116,69 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
                   child: Card(
                     margin: EdgeInsets.zero,
                     elevation: 0,
-                    child: ListTile(
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            entry.emotions.isNotEmpty
-                                ? entry.emotions.entries.map((e) => '${e.key}: ${e.value}/6').join(', ')
-                                : 'Brak wybranych emocji',
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisuY',
-                            style: const TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                        ],
-                      ),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(_formatTime(entry.dateTime)),
-                          const SizedBox(height: 4),
-                          Text('${_formatDate(entry.dateTime)}, ${_weekdayName(entry.dateTime)}'),
-                        ],
-                      ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
                       onTap: () => _showEntryDialog(context, entry, originalIndex),
                       onLongPress: () => _confirmDelete(context, originalIndex),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    entry.emotions.isNotEmpty
+                                        ? entry.emotions.entries.map((e) => e.key).join(', ')
+                                        : 'Brak wybranych emocji',
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisu',
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      color: Theme.of(context).hintColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                
+                                  const SizedBox(height: 2),
+                                  if (_relativeLabel(entry.dateTime) != null) ...[
+                                    Text(
+                                      _relativeLabel(entry.dateTime)!,
+                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                    ),
+                                    const SizedBox(height: 2),
+                                  ],
+                                  Text(
+                                    '${_weekdayName(entry.dateTime)} ${_formatDate(entry.dateTime)}',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  if (entry.editedAt != null) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Edyt.: ${_formatTime(entry.editedAt!)}, ${_formatDate(entry.editedAt!)}',
+                                      style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -402,15 +448,30 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
 
   String _weekdayName(DateTime dt) {
     const names = [
-      'poniedziałek',
-      'wtorek',
-      'środa',
-      'czwartek',
-      'piątek',
-      'sobota',
-      'niedziela',
+      'Poniedziałek',
+      'Wtorek',
+      'Środa',
+      'Czwartek',
+      'Piątek',
+      'Sobota',
+      'Niedziela',
     ];
     return names[(dt.weekday - 1) % 7];
+  }
+
+  String? _relativeLabel(DateTime dt) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(dt.year, dt.month, dt.day);
+    final diffDays = today.difference(target).inDays;
+    if (diffDays == 0) {
+      return 'Dzisiaj ${_formatTime(dt)}';
+    } else if (diffDays == 1) {
+      return 'Wczoraj ${_formatTime(dt)}';
+    } else if (diffDays == 2) {
+      return 'Przedwczoraj ${_formatTime(dt)}';
+    }
+    return null;
   }
 
   Map<String, List<MapEntry<String, int>>> _groupEntryByMain(EmotionEntry entry) {

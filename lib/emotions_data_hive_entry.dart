@@ -7,6 +7,7 @@ import 'package:hive/hive.dart';
 class EmotionEntry {
   String title;
   DateTime dateTime;
+  DateTime? editedAt;
   Map<String, int> emotions;
   String situationDescription;
   String personalNote;
@@ -15,6 +16,7 @@ class EmotionEntry {
 
   EmotionEntry({
     required this.dateTime,
+    this.editedAt,
     this.title = '',
     required this.emotions,
     this.situationDescription = '',
@@ -33,7 +35,16 @@ class EmotionEntryAdapter extends TypeAdapter<EmotionEntry> {
   EmotionEntry read(BinaryReader reader) {
     final title = reader.read() as String;
     final dateTime = reader.read() as DateTime;
-    final emotionsDynamic = reader.read() as Map;
+    final third = reader.read();
+
+    DateTime? editedAt;
+    late Map emotionsDynamic;
+    if (third is DateTime) {
+      editedAt = third;
+      emotionsDynamic = reader.read() as Map;
+    } else {
+      emotionsDynamic = third as Map;
+    }
 
     String situationDescription = '';
     String personalNote = '';
@@ -62,12 +73,17 @@ class EmotionEntryAdapter extends TypeAdapter<EmotionEntry> {
         deletedAt = v;
         continue;
       }
+      if (v is DateTime && editedAt == null) {
+        editedAt = v;
+        continue;
+      }
     }
 
     final emotions = Map<String, int>.from(emotionsDynamic.map((k, v) => MapEntry(k as String, v as int)));
     return EmotionEntry(
       title: title,
       dateTime: dateTime,
+      editedAt: editedAt,
       emotions: emotions,
       situationDescription: situationDescription,
       personalNote: personalNote,
@@ -81,6 +97,7 @@ class EmotionEntryAdapter extends TypeAdapter<EmotionEntry> {
     writer
       ..write(obj.title)
       ..write(obj.dateTime)
+      ..write(obj.editedAt)
       ..write(obj.emotions)
       ..write(obj.situationDescription)
       ..write(obj.personalNote)
