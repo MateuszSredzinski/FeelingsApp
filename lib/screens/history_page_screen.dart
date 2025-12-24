@@ -8,7 +8,7 @@ import 'package:feelings/theme/app_gradients.dart';
 import 'package:feelings/screens/choose_emotions_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:feelings/widgets/feelings_dialog.dart';
+import 'package:feelings/widgets/adaptive_pinned_dialog.dart';
 import 'package:feelings/settings/settings_screen.dart';
 import 'package:feelings/settings/settings_cubit.dart';
 
@@ -257,134 +257,123 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
       context: context,
       barrierColor: Colors.black.withOpacity(0.4),
       builder: (dialogContext) {
-        return FeelingsDialog(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Wybrane emocje', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                      ),
-                    ],
-                  ),
-                  if (_groupEntryByMain(entry).isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: _groupEntryByMain(entry).entries.map((group) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(group.key, style: const TextStyle(fontWeight: FontWeight.w600)),
-                              const SizedBox(height: 4),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: group.value.map((emotion) {
-                                  return Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      ElevatedButton(
-                                        style:
-                                            ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                                        onPressed: null,
-                                        child: Text(
-                                          emotion.key,
-                                          style: const TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      if (intensityEnabled && emotion.value > 0) ...[
-                                        const SizedBox(height: 6),
-                                        _buildIntensityDots(emotion.value),
-                                      ],
-                                    ],
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    )
-                  else
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 12),
-                      child: Text('Brak wybranych emocji'),
-                    ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Notatka dla siebie',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisu',
-                    style: const TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () {
-                          Navigator.of(dialogContext).pop();
-                          _confirmDelete(
-                            context,
-                            index,
-                            onCancel: () => _showEntryDialog(
-                              context,
-                              entry,
-                              index,
-                              intensityEnabled,
-                            ),
-                          );
-                        },
-                      ),
-                      const Spacer(),
-                      ElevatedButton(
-                        onPressed: () async {
-                          Navigator.of(dialogContext).pop();
-                          final result = await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => EmotionSelectPage(
-                                initialSelection:
-                                    Map<String, int>.from(entry.subEmotionIntensity),
-                                entryIndex: index,
-                                initialNote: entry.situationDescription,
-                                initialPersonalNote: entry.personalNote,
-                              ),
-                            ),
-                          );
-                          if (result == true && context.mounted) {
-                            final updatedState = getIt<EntryCubit>().state;
-                            if (index >= 0 && index < updatedState.length) {
-                              _showEntryDialog(context, updatedState[index], index, intensityEnabled);
-                            }
-                          }
-                        },
-                        child: const Text('Edytuj'),
-                      ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: const Text('Zamknij'),
-                      ),
-                    ],
-                  ),
-                ],
+        return AdaptivePinnedDialog(
+          header: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Wybrane emocje',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(dialogContext).pop(),
               ),
-            ),
+            ],
           ),
+          footer: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  _confirmDelete(
+                    context,
+                    index,
+                    onCancel: () => _showEntryDialog(
+                      context,
+                      entry,
+                      index,
+                      intensityEnabled,
+                    ),
+                  );
+                },
+              ),
+              const Spacer(),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(dialogContext).pop();
+                  final result = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => EmotionSelectPage(
+                        initialSelection: Map<String, int>.from(entry.subEmotionIntensity),
+                        entryIndex: index,
+                        initialNote: entry.situationDescription,
+                        initialPersonalNote: entry.personalNote,
+                      ),
+                    ),
+                  );
+                  if (result == true && context.mounted) {
+                    final updatedState = getIt<EntryCubit>().state;
+                    if (index >= 0 && index < updatedState.length) {
+                      _showEntryDialog(context, updatedState[index], index, intensityEnabled);
+                    }
+                  }
+                },
+                child: const Text('Edytuj'),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Zamknij'),
+              ),
+            ],
+          ),
+          bodyChildren: [
+            if (_groupEntryByMain(entry).isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _groupEntryByMain(entry).entries.map((group) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(group.key, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: group.value.map((emotion) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                                  onPressed: null,
+                                  child: Text(
+                                    emotion.key,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                if (intensityEnabled && emotion.value > 0) ...[
+                                  const SizedBox(height: 6),
+                                  _buildIntensityDots(emotion.value),
+                                ],
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              )
+            else
+              const Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: Text('Brak wybranych emocji'),
+              ),
+            const SizedBox(height: 12),
+            const Text(
+              'Notatka dla siebie',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              entry.personalNote.isNotEmpty ? entry.personalNote : 'Brak wpisu',
+              style: const TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ],
         );
       },
     );
@@ -395,43 +384,34 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
       context: context,
       barrierColor: Colors.black.withOpacity(0.4),
       builder: (dialogContext) {
-        return FeelingsDialog(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Przenieść wpis do kosza?',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                const Text('Wpis zostanie oznaczony jako usunięty i trafi do kosza.'),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(dialogContext).pop();
-                        if (onCancel != null) onCancel();
-                      },
-                      child: const Text('Anuluj'),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: () async {
-                        await getIt<EntryCubit>().deleteToTrash(index);
-                        if (dialogContext.mounted) Navigator.of(dialogContext).pop();
-                      },
-                      child: const Text('Przenieś do kosza'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        return AdaptivePinnedDialog(
+          header: const Text(
+            'Przenieść wpis do kosza?',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
+          footer: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  if (onCancel != null) onCancel();
+                },
+                child: const Text('Anuluj'),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton(
+                onPressed: () async {
+                  await getIt<EntryCubit>().deleteToTrash(index);
+                  if (dialogContext.mounted) Navigator.of(dialogContext).pop();
+                },
+                child: const Text('Przenieś do kosza'),
+              ),
+            ],
+          ),
+          bodyChildren: const [
+            Text('Wpis zostanie oznaczony jako usunięty i trafi do kosza.'),
+          ],
         );
       },
     );

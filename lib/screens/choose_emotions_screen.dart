@@ -7,7 +7,7 @@ import 'package:feelings/theme/app_gradients.dart';
 import 'package:feelings/settings/settings_screen.dart';
 import 'package:feelings/settings/settings_cubit.dart';
 import 'package:feelings/screens/save_summary_popup.dart';
-import 'package:feelings/widgets/feelings_dialog.dart';
+import 'package:feelings/widgets/adaptive_pinned_dialog.dart';
 import 'package:feelings/screens/text_entry_screen.dart';
 import 'package:feelings/widgets/intensity_button.dart';
 import 'package:flutter/material.dart';
@@ -59,136 +59,135 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
       }
     }
     showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return StatefulBuilder(builder: (context, setPopupState) {
-          return FeelingsDialog(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () => FocusScope.of(context).unfocus(),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('Wybierz emocje z "${emotion.name}"',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 12),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: emotion.subEmotions.length,
-                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 240,
-                          mainAxisExtent: 56,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                        ),
-                        itemBuilder: (context, index) {
-                          final sub = emotion.subEmotions[index];
-                          final intensity = selectedSubEmotions[sub] ?? 0;
-                          final isSelected = selectedSubEmotions.containsKey(sub);
-                          final showIntensity = intensityEnabled && isSelected;
-                          final reserveSpace = intensityEnabled;
-                          final displayValue =
-                              intensity == 0 ? 1 : intensity.clamp(1, 4);
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 160),
-                            curve: Curves.easeOut,
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 160),
-                                    curve: Curves.easeOut,
-                                    decoration: BoxDecoration(
-                                      color: isSelected ? Colors.blue : Colors.grey[300],
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: isSelected
-                                          ? Border.all(color: Colors.blueAccent, width: 1.5)
-                                          : Border.all(color: Colors.transparent),
-                                    ),
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(16),
-                                      onTap: () {
-                                        setPopupState(() {
-                                          if (isSelected) {
-                                            selectedSubEmotions.remove(sub);
-                                          } else {
-                                            selectedSubEmotions[sub] = intensityEnabled ? 1 : 0;
-                                          }
-                                        });
-                                        setState(() {});
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            if (isSelected) const Icon(Icons.check, size: 14, color: Colors.white),
-                                            if (isSelected) const SizedBox(width: 4),
-                                            Expanded(
-                                              child: Text(
-                                                sub,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  color: isSelected ? Colors.white : Colors.black87,
-                                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Visibility(
-                                  visible: showIntensity,
-                                  maintainSize: reserveSpace,
-                                  maintainAnimation: reserveSpace,
-                                  maintainState: reserveSpace,
-                                  child: IntensityButton(
-                                    value: displayValue,
-                                    maxValue: 4,
-                                    size: 30,
-                                    enabled: showIntensity,
-                                    onChanged: (next) {
-                                      setPopupState(() {
-                                        selectedSubEmotions[sub] = next;
-                                      });
-                                      setState(() {});
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // zamknij popup wyboru sub-emocji
-                        },
-                        child: const Text('Zatwierdź'),
-                      ),
-                    ],
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setPopupState) {
+            return AdaptivePinnedDialog(
+              header: Text('Wybierz emocje z "${emotion.name}"',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              footer: SafeArea(
+                top: false,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Zatwierdź'),
                   ),
                 ),
               ),
-            ),
-          );
-        });
-      },
-    );
+              bodyChildren: [
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: emotion.subEmotions.length,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 240,
+                    mainAxisExtent: 56,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemBuilder: (context, index) {
+                    final sub = emotion.subEmotions[index];
+                    final intensity = selectedSubEmotions[sub] ?? 0;
+                    final isSelected = selectedSubEmotions.containsKey(sub);
+                    final showIntensity = intensityEnabled && isSelected;
+                    final reserveSpace = intensityEnabled;
+                    final displayValue =
+                        intensity == 0 ? 1 : intensity.clamp(1, 4);
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 160),
+                      curve: Curves.easeOut,
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 160),
+                              curve: Curves.easeOut,
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.blue : Colors.grey[300],
+                                borderRadius: BorderRadius.circular(16),
+                                border: isSelected
+                                    ? Border.all(color: Colors.blueAccent, width: 1.5)
+                                    : Border.all(color: Colors.transparent),
+                              ),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () {
+                                  setPopupState(() {
+                                    if (isSelected) {
+                                      selectedSubEmotions.remove(sub);
+                                    } else {
+                                      selectedSubEmotions[sub] =
+                                          intensityEnabled ? 1 : 0;
+                                    }
+                                  });
+                                  setState(() {});
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 6),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (isSelected)
+                                        const Icon(Icons.check,
+                                            size: 14, color: Colors.white),
+                                      if (isSelected) const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          sub,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color:
+                                                isSelected ? Colors.white : Colors.black87,
+                                            fontWeight: isSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Visibility(
+                            visible: showIntensity,
+                            maintainSize: reserveSpace,
+                            maintainAnimation: reserveSpace,
+                            maintainState: reserveSpace,
+                            child: IntensityButton(
+                              value: displayValue,
+                              maxValue: 4,
+                              size: 30,
+                              enabled: showIntensity,
+                              onChanged: (next) {
+                                setPopupState(() {
+                                  selectedSubEmotions[sub] = next;
+                                });
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            );
+          });
+        },
+      );
   }
 
   @override

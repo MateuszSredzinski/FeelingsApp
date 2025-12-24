@@ -50,10 +50,11 @@ Name your emotions, capture context, and track how you feel over time.
 ## Tasks in progress (24.12)
 - Wyrównać kafelki z emocjami w środku emocji głównych 
 - Poprawa systemu okreslania intensywnosci
-- Poprawa wyglądu systemu intensywności
+- Statyczne zatwierdź - header i footer we wszystkich miejsach - rolka na emocjach w przypadku duzej ilosc podemocji - dodano caly komponent adaptive pinned dialog - zrobiono w branchu intensity-button
 
 ## Roadmap / Backlog
-- Statyczne zatwierdź - rolka na emocjach w przypadku duzej ilosc podemocji
+- Poprawa wyglądu systemu intensywności
+- maksymalna ilosc znakow w podgladzie kafelka WPIS
 - Testy na fizycznym Androidzie.
 - Lupa/haptic na kafelku z emocją (lepszy feedback dotykowy). - akt. 24.12.25 nie ma potrzeby
 - Integracja Riverpod.
