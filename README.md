@@ -54,6 +54,7 @@ Name your emotions, capture context, and track how you feel over time.
 
 ## Roadmap / Backlog
 - Poprawa wyglądu systemu intensywności
+- Poprawienie scrolla na ekranie glownym przy pojawianiu sie przycisku zatwierdz
 - maksymalna ilosc znakow w podgladzie kafelka WPIS
 - Testy na fizycznym Androidzie.
 - Lupa/haptic na kafelku z emocją (lepszy feedback dotykowy). - akt. 24.12.25 nie ma potrzeby
