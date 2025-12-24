@@ -10,6 +10,7 @@ import 'package:iconsax/iconsax.dart';
 import 'emotions_data_hive_entry.dart';
 import 'entry_repo.dart';
 import 'cubbit/entry_cubbit.dart';
+import 'settings/settings_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -19,9 +20,11 @@ void main() async {
 
   Hive.registerAdapter(EmotionEntryAdapter());
   final box = await Hive.openBox('entriesBox');
+  final settingsBox = await Hive.openBox('settingsBox');
 
   getIt.registerSingleton<EntryRepository>(EntryRepository(box));
   getIt.registerSingleton<EntryCubit>(EntryCubit(getIt<EntryRepository>())..load());
+  getIt.registerSingleton<SettingsCubit>(SettingsCubit(settingsBox));
 
   runApp(const FeelingApp());
 }
@@ -31,12 +34,15 @@ class FeelingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Feeling',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: BlocProvider.value(
-        value: getIt<EntryCubit>(),
-        child: const MainNavigationPage(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: getIt<EntryCubit>()),
+        BlocProvider.value(value: getIt<SettingsCubit>()),
+      ],
+      child: MaterialApp(
+        title: 'Feeling',
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: const MainNavigationPage(),
       ),
     );
   }

@@ -47,13 +47,15 @@ Name your emotions, capture context, and track how you feel over time.
 - Usunąć skalę 1/6. 3/6 itd w liście na stronie historii emocji. Tylko na tej liście
 - Zmiana kolejność z Data | Dzień na Dzień | Data w historii emocji
 - Dodać w historii: 'Dzisiaj 10:37', 'Wczoraj godzina', 'Przedwczoraj godzina', 'Gdy później niz przedwczoraj nic nie wyswietlaj
+## Tasks in progress (24.12)
+- Wyrównać kafelki z emocjami w środku emocji głównych 
+- Poprawa systemu okreslania intensywnosci
+- Poprawa wyglądu systemu intensywności
 
 ## Roadmap / Backlog
-- Wyrównać kafelki z emocjami w środku emocji głównych 
 - Statyczne zatwierdź - rolka na emocjach w przypadku duzej ilosc podemocji
-- Za małe kropki intensywności emocji
 - Testy na fizycznym Androidzie.
-- Lupa/haptic na kafelku z emocją (lepszy feedback dotykowy).
+- Lupa/haptic na kafelku z emocją (lepszy feedback dotykowy). - akt. 24.12.25 nie ma potrzeby
 - Integracja Riverpod.
 - Dodać pytania do usera - co w Tobie? Co tam się wydarzyło?
 - Paginacja na karcie historia

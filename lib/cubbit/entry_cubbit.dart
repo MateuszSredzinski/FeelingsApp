@@ -20,7 +20,7 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
 
   Future<void> update(
     int index,
-    Map<String, int> emotions, {
+    Map<String, int> subEmotionIntensity, {
     String? title,
     String? situationDescription,
     String? personalNote,
@@ -32,7 +32,7 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
       title: title ?? current.title,
       situationDescription: situationDescription ?? current.situationDescription,
       personalNote: personalNote ?? current.personalNote,
-      emotions: Map.from(emotions),
+      subEmotionIntensity: Map.from(subEmotionIntensity),
       isDeleted: current.isDeleted,
       deletedAt: current.deletedAt,
     );
@@ -48,7 +48,7 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
       title: current.title,
       situationDescription: current.situationDescription,
       personalNote: current.personalNote,
-      emotions: Map.from(current.emotions),
+      subEmotionIntensity: Map.from(current.subEmotionIntensity),
       isDeleted: true,
       deletedAt: DateTime.now(),
     );
@@ -64,7 +64,7 @@ class EntryCubit extends Cubit<List<EmotionEntry>> {
       title: current.title,
       situationDescription: current.situationDescription,
       personalNote: current.personalNote,
-      emotions: Map.from(current.emotions),
+      subEmotionIntensity: Map.from(current.subEmotionIntensity),
       isDeleted: false,
       deletedAt: null,
     );

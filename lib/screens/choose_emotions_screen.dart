@@ -5,10 +5,13 @@ import 'package:feelings/emotions_data_hive_entry.dart';
 import 'package:feelings/main.dart';
 import 'package:feelings/theme/app_gradients.dart';
 import 'package:feelings/settings/settings_screen.dart';
+import 'package:feelings/settings/settings_cubit.dart';
 import 'package:feelings/screens/save_summary_popup.dart';
 import 'package:feelings/widgets/feelings_dialog.dart';
 import 'package:feelings/screens/text_entry_screen.dart';
+import 'package:feelings/widgets/intensity_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class EmotionSelectPage extends StatefulWidget {
   const EmotionSelectPage({
@@ -31,25 +34,30 @@ class EmotionSelectPage extends StatefulWidget {
 }
 
 class _EmotionSelectPageState extends State<EmotionSelectPage> {
-  late Map<String, int> selectedEmotions;
+  late Map<String, int> selectedSubEmotions;
   String? typedNote;
 
   @override
   void initState() {
     super.initState();
-    selectedEmotions = Map<String, int>.from(widget.initialSelection ?? {});
+    selectedSubEmotions = Map<String, int>.from(widget.initialSelection ?? {});
     typedNote = widget.initialPersonalNote;
   }
 
-  void toggleEmotionLocally(String name) {
-    setState(() {
-      selectedEmotions.containsKey(name)
-          ? selectedEmotions.remove(name)
-          : selectedEmotions[name] = 1;
-    });
-  }
-
-  void _openPopupFor(Emotion emotion) {
+  void _openPopupFor(Emotion emotion, bool intensityEnabled) {
+    if (intensityEnabled) {
+      final keysToFix = selectedSubEmotions.entries
+          .where((entry) => entry.value == 0)
+          .map((entry) => entry.key)
+          .toList();
+      if (keysToFix.isNotEmpty) {
+        setState(() {
+          for (final key in keysToFix) {
+            selectedSubEmotions[key] = 1;
+          }
+        });
+      }
+    }
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -68,68 +76,102 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
                       Text('Wybierz emocje z "${emotion.name}"',
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: emotion.subEmotions.map((sub) {
-                          final intensity = selectedEmotions[sub];
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: intensity != null ? Colors.blue : Colors.grey[300],
-                                  foregroundColor: intensity != null ? Colors.white : Colors.black87,
-                                  side: intensity != null
-                                      ? const BorderSide(color: Colors.blueAccent, width: 2)
-                                      : const BorderSide(color: Colors.transparent),
-                                ),
-                                onPressed: () {
-                                  setPopupState(() {
-                                    intensity == null
-                                        ? selectedEmotions[sub] = 1
-                                        : selectedEmotions.remove(sub);
-                                  });
-                                  setState(() {});
-                                },
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (intensity != null) const Icon(Icons.check, size: 16),
-                                    if (intensity != null) const SizedBox(width: 4),
-                                    Text(sub),
-                                  ],
-                                ),
-                              ),
-                              if (intensity != null)
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: List.generate(6, (index) {
-                                    final barValue = index + 1;
-                                    return GestureDetector(
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: emotion.subEmotions.length,
+                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 240,
+                          mainAxisExtent: 56,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
+                        itemBuilder: (context, index) {
+                          final sub = emotion.subEmotions[index];
+                          final intensity = selectedSubEmotions[sub] ?? 0;
+                          final isSelected = selectedSubEmotions.containsKey(sub);
+                          final showIntensity = intensityEnabled && isSelected;
+                          final reserveSpace = intensityEnabled;
+                          final displayValue =
+                              intensity == 0 ? 1 : intensity.clamp(1, 4);
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 160),
+                            curve: Curves.easeOut,
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 160),
+                                    curve: Curves.easeOut,
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? Colors.blue : Colors.grey[300],
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: isSelected
+                                          ? Border.all(color: Colors.blueAccent, width: 1.5)
+                                          : Border.all(color: Colors.transparent),
+                                    ),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(16),
                                       onTap: () {
                                         setPopupState(() {
-                                          selectedEmotions[sub] = barValue;
+                                          if (isSelected) {
+                                            selectedSubEmotions.remove(sub);
+                                          } else {
+                                            selectedSubEmotions[sub] = intensityEnabled ? 1 : 0;
+                                          }
                                         });
                                         setState(() {});
                                       },
-                                      child: Container(
-                                        margin: const EdgeInsets.symmetric(horizontal: 2),
-                                        width: 12,
-                                        height: 12,
-                                        decoration: BoxDecoration(
-                                          color: (selectedEmotions[sub]! >= barValue)
-                                              ? Colors.blue
-                                              : Colors.grey[300],
-                                          shape: BoxShape.circle,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (isSelected) const Icon(Icons.check, size: 14, color: Colors.white),
+                                            if (isSelected) const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                sub,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color: isSelected ? Colors.white : Colors.black87,
+                                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    );
-                                  }),
+                                    ),
+                                  ),
                                 ),
-                            ],
+                                const SizedBox(width: 8),
+                                Visibility(
+                                  visible: showIntensity,
+                                  maintainSize: reserveSpace,
+                                  maintainAnimation: reserveSpace,
+                                  maintainState: reserveSpace,
+                                  child: IntensityButton(
+                                    value: displayValue,
+                                    maxValue: 4,
+                                    size: 30,
+                                    enabled: showIntensity,
+                                    onChanged: (next) {
+                                      setPopupState(() {
+                                        selectedSubEmotions[sub] = next;
+                                      });
+                                      setState(() {});
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
                           );
-                        }).toList(),
+                        },
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
@@ -151,8 +193,9 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
 
   @override
   Widget build(BuildContext context) {
+    final intensityEnabled = context.watch<SettingsCubit>().state;
     final hasSelection =
-        selectedEmotions.isNotEmpty || (typedNote != null && typedNote!.isNotEmpty);
+        selectedSubEmotions.isNotEmpty || (typedNote != null && typedNote!.isNotEmpty);
     final totalItems = mainEmotions.length + 1; // plus "Wpis"
     final notePreview = (typedNote ?? '').split('\n').first.trim();
     final hasNote = notePreview.isNotEmpty;
@@ -189,7 +232,7 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
                   itemBuilder: (context, index) {
                     if (index < mainEmotions.length) {
                       final e = mainEmotions[index];
-                      final selectedForMain = selectedEmotions.entries
+                      final selectedForMain = selectedSubEmotions.entries
                           .where((entry) => e.subEmotions.contains(entry.key))
                           .map((entry) => entry.key)
                           .toList();
@@ -201,7 +244,7 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
                         shadowColor:
                             hasSelectionForMain ? const Color(0xFFE91E63).withOpacity(0.2) : null,
                         child: InkWell(
-                          onTap: () => _openPopupFor(e),
+                          onTap: () => _openPopupFor(e, intensityEnabled),
                           borderRadius: BorderRadius.circular(12),
                           child: Stack(
                             clipBehavior: Clip.none,
@@ -316,15 +359,19 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
   Future<void> _openSummaryPopup() async {
     final isEditing = widget.entryIndex != null;
     DateTime? createdAt;
+    final intensityEnabled = context.read<SettingsCubit>().state;
+    final mapForSave = intensityEnabled
+        ? _normalizeIntensity(selectedSubEmotions)
+        : {for (final key in selectedSubEmotions.keys) key: 0};
     final result = await showDialog<bool>(
       context: context,
       barrierColor: Colors.black.withOpacity(0.4),
       barrierDismissible: false,
       builder: (dialogContext) {
         return SaveSummaryPopup(
-          selectedEmotions: Map<String, int>.from(selectedEmotions),
           initialPersonalNote: typedNote ?? widget.initialPersonalNote,
-          groupedEmotions: _groupSelectedByMain(),
+          groupedEmotions: _groupSelectedByMain(mapForSave),
+          intensityEnabled: intensityEnabled,
           onConfirm: (situation, personalNote) async {
             final appliedSituation = widget.initialNote ?? '';
             final appliedPersonalNote = personalNote.isEmpty
@@ -336,7 +383,7 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
               title: appliedSituation,
               situationDescription: appliedSituation,
               personalNote: appliedPersonalNote,
-              emotions: Map<String, int>.from(selectedEmotions),
+              subEmotionIntensity: Map<String, int>.from(mapForSave),
               isDeleted: false,
               deletedAt: null,
             );
@@ -344,7 +391,7 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
             if (widget.entryIndex != null) {
               await cubit.update(
                 widget.entryIndex!,
-                selectedEmotions,
+                mapForSave,
                 title: appliedSituation,
                 situationDescription: appliedSituation,
                 personalNote: appliedPersonalNote,
@@ -355,7 +402,7 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
             }
 
             setState(() {
-              selectedEmotions.clear();
+              selectedSubEmotions.clear();
               typedNote = null;
             });
           },
@@ -388,7 +435,8 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
     );
   }
 
-  Map<String, List<MapEntry<String, int>>> _groupSelectedByMain() {
+  Map<String, List<MapEntry<String, int>>> _groupSelectedByMain(
+      [Map<String, int>? source]) {
     final Map<String, String> subToMain = {};
     for (final main in mainEmotions) {
       for (final sub in main.subEmotions) {
@@ -397,12 +445,22 @@ class _EmotionSelectPageState extends State<EmotionSelectPage> {
     }
 
     final Map<String, List<MapEntry<String, int>>> grouped = {};
-    selectedEmotions.forEach((sub, value) {
+    final data = source ?? selectedSubEmotions;
+    data.forEach((sub, value) {
       final main = subToMain[sub] ?? 'Inne';
       grouped.putIfAbsent(main, () => []);
       grouped[main]!.add(MapEntry(sub, value));
     });
     return grouped;
+  }
+
+  Map<String, int> _normalizeIntensity(Map<String, int> source) {
+    final result = <String, int>{};
+    for (final entry in source.entries) {
+      final value = entry.value;
+      result[entry.key] = value == 0 ? 1 : value.clamp(1, 4);
+    }
+    return result;
   }
 }
 

@@ -39,7 +39,7 @@ class TrashScreen extends StatelessWidget {
                 child: ListTile(
                   title: Text(entry.title.isEmpty ? 'Bez tytułu' : entry.title),
                   subtitle: Text(
-                    '${entry.emotions.keys.join(', ')}\n${_formatDate(entry.dateTime)} ${_formatTime(entry.dateTime)}',
+                    '${entry.subEmotionIntensity.keys.join(', ')}\n${_formatDate(entry.dateTime)} ${_formatTime(entry.dateTime)}',
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,

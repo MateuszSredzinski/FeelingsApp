@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:feelings/widgets/feelings_dialog.dart';
 import 'package:feelings/settings/settings_screen.dart';
+import 'package:feelings/settings/settings_cubit.dart';
 
 class EmotionHistoryPage extends StatefulWidget {
   const EmotionHistoryPage({
@@ -34,6 +35,7 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
   @override
   Widget build(BuildContext context) {
     final cubit = getIt<EntryCubit>();
+    final intensityEnabled = context.watch<SettingsCubit>().state;
 
     return Scaffold(
       appBar: AppBar(
@@ -118,7 +120,7 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
                     elevation: 0,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
-                      onTap: () => _showEntryDialog(context, entry, originalIndex),
+                      onTap: () => _showEntryDialog(context, entry, originalIndex, intensityEnabled),
                       onLongPress: () => _confirmDelete(context, originalIndex),
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
@@ -131,8 +133,8 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    entry.emotions.isNotEmpty
-                                        ? entry.emotions.entries.map((e) => e.key).join(', ')
+                                    entry.subEmotionIntensity.isNotEmpty
+                                        ? entry.subEmotionIntensity.entries.map((e) => e.key).join(', ')
                                         : 'Brak wybranych emocji',
                                   ),
                                   const SizedBox(height: 4),
@@ -245,7 +247,12 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
     super.dispose();
   }
 
-  void _showEntryDialog(BuildContext context, EmotionEntry entry, int index) {
+  void _showEntryDialog(
+    BuildContext context,
+    EmotionEntry entry,
+    int index,
+    bool intensityEnabled,
+  ) {
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.4),
@@ -295,8 +302,10 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
                                           style: const TextStyle(color: Colors.white),
                                         ),
                                       ),
-                                      const SizedBox(height: 6),
-                                      _buildIntensityDots(emotion.value),
+                                      if (intensityEnabled && emotion.value > 0) ...[
+                                        const SizedBox(height: 6),
+                                        _buildIntensityDots(emotion.value),
+                                      ],
                                     ],
                                   );
                                 }).toList(),
@@ -332,7 +341,12 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
                           _confirmDelete(
                             context,
                             index,
-                            onCancel: () => _showEntryDialog(context, entry, index),
+                            onCancel: () => _showEntryDialog(
+                              context,
+                              entry,
+                              index,
+                              intensityEnabled,
+                            ),
                           );
                         },
                       ),
@@ -343,7 +357,8 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
                           final result = await Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => EmotionSelectPage(
-                                initialSelection: Map<String, int>.from(entry.emotions),
+                                initialSelection:
+                                    Map<String, int>.from(entry.subEmotionIntensity),
                                 entryIndex: index,
                                 initialNote: entry.situationDescription,
                                 initialPersonalNote: entry.personalNote,
@@ -353,7 +368,7 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
                           if (result == true && context.mounted) {
                             final updatedState = getIt<EntryCubit>().state;
                             if (index >= 0 && index < updatedState.length) {
-                              _showEntryDialog(context, updatedState[index], index);
+                              _showEntryDialog(context, updatedState[index], index, intensityEnabled);
                             }
                           }
                         },
@@ -425,7 +440,7 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
   Widget _buildIntensityDots(int value) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: List.generate(6, (i) {
+      children: List.generate(4, (i) {
         final dotValue = i + 1;
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 2),
@@ -483,7 +498,7 @@ class _EmotionHistoryPageState extends State<EmotionHistoryPage> {
     }
 
     final Map<String, List<MapEntry<String, int>>> grouped = {};
-    entry.emotions.forEach((sub, value) {
+    entry.subEmotionIntensity.forEach((sub, value) {
       final main = subToMain[sub] ?? 'Inne';
       grouped.putIfAbsent(main, () => []);
       grouped[main]!.add(MapEntry(sub, value));
